@@ -3,20 +3,20 @@
 #### 1. **Pod**  
    - The smallest and most basic deployable unit in Kubernetes.  
    - Represents a single instance of a running process in a cluster, which can contain one or more containers.  
-   
-![alt text](image-4.png)
+    
+
 
 #### 2. **Node**  
    - A single physical or virtual machine in the Kubernetes cluster.  
    - Nodes run the application workloads and are managed by the master node (control plane).  
 
-![alt text](image-2.png)
+
 
 #### 3. **Cluster**  
    - A collection of nodes (both master and worker) that work together.  
    - Provides the environment where applications run and are managed.  
 
-   ![alt text](image-3.png)
+  
 
 #### 4. **Replication Controller/Replica Set**  
    - Ensures that a specified number of pod replicas are running at all times.  
@@ -58,7 +58,7 @@
 - These plugins create a **virtual network** overlay, allowing each Pod to have a unique **virtual IP address** within the cluster.  
 - The node’s physical IP address remains unchanged, while the Pod IPs are dynamically assigned within the cluster’s **networking CIDR range**.  
 
-PIC 
+![alt text](image-4.png)
 
 
 
@@ -69,6 +69,7 @@ PIC
   - **Virtual Machines**: Examples include cloud-based instances like AWS EC2 or Azure VMs.  
   - **Physical Machines**: Bare-metal servers or on-premises machines.  
 
+![alt text](image-2.png)
 
 ### **Cluster**  
 
@@ -90,6 +91,7 @@ PIC
 - Think of it as the **command center**, where all the crucial decisions are made—deploying Pods, scaling workloads, maintaining the desired state, and healing the cluster when things go wrong.  
 - Without the Control Plane, the Kubernetes cluster is just a collection of machines with no intelligence or coordination.  
 
+ ![alt text](image-3.png)
 
 
 ### **Replica Set / Replication Controller**  
