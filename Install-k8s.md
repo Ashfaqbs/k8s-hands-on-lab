@@ -54,3 +54,5 @@ This will start our single-node Kubernetes cluster, and we can begin interacting
 #### **Conclusion**  
 With **Minikube**, we can simulate a full Kubernetes environment on a single machine. Docker Desktop provides the necessary container runtime, and Minikube acts as the orchestrator. **kubectl** can either be installed separately or automatically managed by Minikube/Docker Desktop, making it easier for developers to test and develop applications locally in a Kubernetes environment.
 
+
+![alt text](image-9.png)
