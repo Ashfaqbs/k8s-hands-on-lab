@@ -462,6 +462,30 @@ C:\Users\ashfa>kubectl logs springboot-crud-deployment-5d7fc46bb9-5248v
 C:\Users\ashfa>
 
 ```
+- Get the application Service URL 
+
+```
+sample cmd
+C:\Users\ashfa>minikube service springboot-crud-svc --url
+http://127.0.0.1:59684
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+C:\Users\ashfa>minikube service springboot-crud-svc
+|-----------|---------------------|-------------|---------------------------|
+| NAMESPACE |        NAME         | TARGET PORT |            URL            |
+|-----------|---------------------|-------------|---------------------------|
+| default   | springboot-crud-svc |        8080 | http://192.168.49.2:32463 |
+|-----------|---------------------|-------------|---------------------------|
+🏃  Starting tunnel for service springboot-crud-svc.
+|-----------|---------------------|-------------|------------------------|
+| NAMESPACE |        NAME         | TARGET PORT |          URL           |
+|-----------|---------------------|-------------|------------------------|
+| default   | springboot-crud-svc |             | http://127.0.0.1:60023 |
+|-----------|---------------------|-------------|------------------------|
+🎉  Opening service default/springboot-crud-svc in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
 
 
 
@@ -491,3 +515,182 @@ C:\Users\ashfa>minikube dashboard
 
 #### Note:
 As we can see in DB and SB app yaml files we have hardcoded the DB creds we can segerate this sensitive information of our application and keep out side the k8s. We will be using the config map and secrets.
+
+- Hardcoded DB credentials is not good for the application as the application will not be secure.
+- We can keep the DB credentials outside of the application in encrypted format and since we are using containerized platform kubernetes itself provides two components (configmap and secrets) to store this type of inputs.
+
+## Understanding secrets and confirmap
+
+### Using secrets and confirmap in our existing code.
+
+- We can see we have provided the DB data in DB and app YAML files.
+- We will keep the DB host and name(schema name) inside the config map and 
+the DB username and password we will keep in secrets.
+
+
+- Create a mysql-configMap.yml file (name can be anything) we will create the file in root directory of the project.
+
+`mysql-configMap.yaml` file.
+``` 
+apiVersion : v1
+kind : ConfigMap # Kubernetes resource kind we are creating and ConfigMap is a k8s object
+metadata:
+  name : db-config # Name of the ConfigMap we can define any name
+data:
+  host : mysql
+  dbName: tempSchema
+
+```
+
+- Create a mysql-secrets.yaml file (name can be anything) we will create the file in root directory of the project.
+
+- encryption of the db credentials we cant provide here directly the db credentials we need to encrypt it and to encrypt the db credentials we can use cmds like
+
+![alt text](image.png)
+```
+unix and mac:
+
+$ echo -n 'root' | base64 
+cm9vdA==
+
+windows:
+
+PS C:\Users\ashfa> [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("root"))
+cm9vdA==
+
+```
+`mysql-secrets.yaml` file.
+``` 
+apiVersion : v1
+kind : Secret # Kubernetes resource kind we are creating and Secret is a k8s object
+metadata:
+  name : mysql-secrets # Name of the ConfigMap we can define any name
+data:
+  username : cm9vdA==
+  password : cm9vdA==
+```
+- Lets remove the hardcoded values from the DB and app YAML files.
+
+```
+- DB YAML file changes.
+
+ name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD # Root username will always be 'root'
+#             value: root   # Hardcoded passwords are not a good idea, we will get the password from a 'Secret' instead
+              valueFrom :
+                secretKeyRef :
+                  name : mysql-secrets # Name of the Secret
+                  key :  password
+                 
+            - name: MYSQL_DATABASE # Setting Database Name from a 'ConfigMap'
+#             value: tempSchema
+              valueFrom :
+                configMapKeyRef :
+                  name : db-config # Name of the ConfigMap 
+                  key :  dbName
+
+
+- App YAML file changes.
+
+ spec:
+      containers:
+        - name: springboot-crud-k8s
+          image: darksharkash/sb3j21crud-k8s:latest
+          ports:
+            - containerPort: 8080
+          env:   # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address 
+#              value: mysql # can get from db yml file but hardcoded
+# This below is using configmap        
+              valueFrom :            
+                configMapKeyRef :
+                  name : db-config
+                  key :  host
+
+            - name: DB_NAME  # Setting Database name 
+#              value: tempSchema # can get from db yml file but this is hardcoded, below using config map to get 
+              valueFrom :
+                configMapKeyRef :
+                  name : db-config
+                  key :  dbName
+
+            - name: DB_USERNAME  # Setting Database username 
+#              value: root #username root is default and we have not defined in db yml file but this is hardcoded, below using secrets to get 
+              valueFrom :
+                secretKeyRef :
+                  name : mysql-secrets
+                  key :  username
+
+            - name: DB_PASSWORD # Setting Database password 
+#              value: root # can get from db yml file but this is hardcoded, below using secrets to get 
+              valueFrom :
+                secretKeyRef :
+                  name : mysql-secrets
+                  key :  password
+
+
+```
+- now we have not hardcoded the DB details and at run time the details are fetched from configmap and secrets.
+
+- Clear up the old resources deployments, secrets of the old app.
+- Stop and start the minikube and point to docker environment.
+
+- Apply the ConfigMap yaml file, secrect yaml file, DB yaml file and app yaml file.
+
+```
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample>kubectl apply -f  mysql-configMap.yaml
+configmap/db-config created
+
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample>kubectl apply -f  mysql-secrets.yaml
+secret/mysql-secrets created
+
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample>kubectl apply -f   db-deployment.yaml
+persistentvolumeclaim/mysql-pv-claim unchanged
+deployment.apps/mysql created
+service/mysql created
+
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample>kubectl apply -f   app-deployment.yaml
+deployment.apps/springboot-crud-deployment created
+service/springboot-crud-svc created
+
+
+
+
+C:\Users\ashfa>kubectl get pods
+NAME                                          READY   STATUS    RESTARTS        AGE
+mysql-bd958bf58-94qd6                         1/1     Running   1 (4h22m ago)   16h
+springboot-crud-deployment-5d7fc46bb9-5248v   1/1     Running   0               7m49s
+springboot-crud-deployment-5d7fc46bb9-8q88x   1/1     Running   0               7m49s
+springboot-crud-deployment-5d7fc46bb9-kq8s6   1/1     Running   0               7m49s
+
+
+
+app logs:
+C:\Users\ashfa>kubectl logs springboot-crud-deployment-5d7fc46bb9-5248v
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.1)
+
+2024-12-22T09:13:05.237Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : Starting SbCrudK8sSampleApplication v0.0.1-SNAPSHOT using Java 21.0.5 with PID 1 (/app/app.jar started by root in /app)
+2024-12-22T09:13:05.240Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : No active profile set, falling back to 1 default profile: "default"
+2024-12-22T09:13:11.336Z  INFO 1 --- [sb-crud-k8s-sample] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+```
+- Tested the application and it works fine.
+
+
+### IMP:
+Since when cleaning up the old app resources like deployment, services for app and db , the PVC resource was not deleted and we are able to see the old app data in newly created DB pod which we created for using secret and configmaps. if its was deleted then we will see no data. 
+
+- Dashboard:
+![alt text](image-1.png)
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+![alt text](image-5.png)
