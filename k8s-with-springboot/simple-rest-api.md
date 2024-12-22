@@ -219,3 +219,190 @@ This way, all subsequent commands will automatically apply to the `dev` namespac
 
 * Cleaning up resources
 ![alt text](image-10.png)
+
+### Using a kubectl command to create a deployment object
+
+- Note: We have already created a docker image we will use the same.
+
+- Creating a deployment using YAML file and we can create anywhere as of now we will create in root directory of our project. and name can be anything.
+
+```
+
+apiVersion: apps/v1 # Describe the version of the api server
+kind: Deployment # Telling what type of object we are creating so its deployment, we can also define types like service
+metadata:
+  name: spring-boot-k8s # Telling the name of the app this can be anything.
+spec:
+  selector:
+    matchLabels:
+      app: spring-boot-k8s # We will use this same name when defining the service so this name is IMPORTANT
+  replicas: 3 # we are telling K8s to create 3 pods in my cluster. Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: spring-boot-k8s # Labels name should be same as the matching labels
+    spec:
+      containers:
+        - name: spring-boot-k8s ## this will be name of my container
+          image: darksharkash/simplerestapisb-k8s:latest # Give the docker image name and version.Image that will be used to containers in the cluster 
+          imagePullPolicy: IfNotPresent # If we dont define this then image will be pulled from docker hub and now this will check our local and if not present then it will pull from docker hub
+          ports:
+            - containerPort: 8080 # The port that the container is running on  the cluster
+
+```
+- Start the minikube:
+
+![alt text](image-11.png)
+
+- Need to create a deployment object from the file .
+ open the terminal and go the file path and type the command.
+ ```
+ C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\spring-boot-3-rest-api-example>kubectl apply -f sbrestapi-k8s-deployment.yaml
+ 
+ o/p
+ deployment.apps/spring-boot-k8s created
+
+ ```
+
+ - Verify the deployments:
+ ```
+
+ C:\Users\ashfa>kubectl get deployments
+
+NAME              READY   UP-TO-DATE   AVAILABLE   AGE
+spring-boot-k8s   3/3     3            3           55s
+ 
+ ```
+
+- Describe the deployment:
+```
+C:\Users\ashfa>kubectl describe deployments spring-boot-k8s
+Name:                   spring-boot-k8s
+Namespace:              default
+CreationTimestamp:      Sat, 21 Dec 2024 18:53:40 +0530
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=spring-boot-k8s
+Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=spring-boot-k8s
+  Containers:
+   spring-boot-k8s:
+    Image:         darksharkash/simplerestapisb-k8s:latest
+    Port:          8080/TCP
+    Host Port:     0/TCP
+    Environment:   <none>
+    Mounts:        <none>
+  Volumes:         <none>
+  Node-Selectors:  <none>
+  Tolerations:     <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   spring-boot-k8s-6fd5f7c845 (3/3 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  2m7s  deployment-controller  Scaled up replica set spring-boot-k8s-6fd5f7c845 to 3
+
+``` 
+
+- Check the pods
+```
+
+C:\Users\ashfa>kubectl get pods
+NAME                               READY   STATUS    RESTARTS   AGE
+spring-boot-k8s-6fd5f7c845-6czxn   1/1     Running   0          3m6s
+spring-boot-k8s-6fd5f7c845-kqrpg   1/1     Running   0          3m6s
+spring-boot-k8s-6fd5f7c845-xm66n   1/1     Running   0          3m6s
+
+C:\Users\ashfa>
+
+We can also check the logs for each pods
+```
+
+- Now we have 3 instances of our applications , the challenge is how to consume this application instance and also load balance the traffic among the 3 instances so we have to use service for to access the application and for the load balance.
+
+- Here Service will act as load balance for the application  instances and also it will act as service discovery as it expose our application to outside world or outside the cluster.
+
+- Creating the yaml file for service.
+
+```
+apiVersion: v1 # Kubernetes API version
+kind: Service # type of  object. Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: springboot-k8s-service # this will be the name of the our service , we can give any name
+spec:
+  selector:
+    app: spring-boot-k8s # this should be the name of the deployment selector matchlabel name IMPORTANT.
+  ports:
+    - protocol: "TCP"
+      port: 8080 # The port that the service is running on in the cluster
+      targetPort: 8080 # The port exposed by the service 
+  type: NodePort # type of the service. (we can access the application with Node IP and Node port)
+```
+
+- Create the service object from the file.
+```
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\spring-boot-3-rest-api-example>kubectl apply -f sbrestapi-k8s-service.yaml
+O/P    
+service/springboot-k8s-service created
+
+verify the service
+
+C:\Users\ashfa>kubectl get service
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes               ClusterIP   10.96.0.1       <none>        443/TCP          2d7h
+springboot-k8s-service   NodePort    10.98.157.147   <none>        8080:31346/TCP   83s
+
+```
+- Access the application 
+
+![alt text](image-12.png)
+
+We can access the application by Node IP and Node Port. from this we can directly call our apis.
+since this is runing on single cluster the ip of node will be same as the minukube ip.
+(didnot work)
+![alt text](image-13.png)
+
+- Accessing the application by service name 
+```
+
+C:\Users\ashfa>minikube service springboot-k8s-service --url
+
+http://127.0.0.1:59447
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+```
+
+Output:
+```
+C:\Users\ashfa>curl http://127.0.0.1:59447/helloworld
+helloworld
+C:\Users\ashfa>
+```
+![alt text](image-14.png)
+
+- K8s dashboard:
+
+![alt text](image-15.png)
+![alt text](image-16.png)
+
+- deployment object we created.
+![alt text](image-17.png)
+- Pods.
+![alt text](image-18.png)
+- Checking self healing.
+
+![alt text](image-19.png)
+post deleting the pod a new pod is created.
+![alt text](image-20.png)
+
+- Service object which we created.
+![alt text](image-21.png)
