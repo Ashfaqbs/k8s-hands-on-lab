@@ -253,8 +253,38 @@ spec:
 - Start the minikube:
 
 ![alt text](image-11.png)
+- need to tell K8s to refer docker env
+```
+minikube docker-env and run the last line how we used in last time
 
-- Need to create a deployment object from the file .
+```
+
+- Need to create a deployment object from the yaml file .
+
+
+```
+apiVersion: apps/v1 # Describe the version of the api server
+kind: Deployment # Telling what type of object we are creating so its deployment, we can also define types like service
+metadata:
+  name: spring-boot-k8s # Telling the name of the app this can be anything.
+spec:
+  selector:
+    matchLabels:
+      app: spring-boot-k8s # We will use this same name when defining the service so this name is IMPORTANT
+  replicas: 3 # we are telling K8s to create 3 pods in my cluster. Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: spring-boot-k8s # Labels name should be same as the matching labels
+    spec:
+      containers:
+        - name: spring-boot-k8s ## this will be name of my container
+          image: darksharkash/simplerestapisb-k8s:latest # Give the docker image name and version.Image that will be used to containers in the cluster 
+          imagePullPolicy: IfNotPresent # If we dont define this then image will be pulled from docker hub and now this will check our local and if not present then it will pull from docker hub
+          ports:
+            - containerPort: 8080 # The port that the container is running on  the cluster
+
+```
  open the terminal and go the file path and type the command.
  ```
  C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\spring-boot-3-rest-api-example>kubectl apply -f sbrestapi-k8s-deployment.yaml
@@ -364,11 +394,14 @@ springboot-k8s-service   NodePort    10.98.157.147   <none>        8080:31346/TC
 ```
 - Access the application 
 
+
+
 ![alt text](image-12.png)
 
 We can access the application by Node IP and Node Port. from this we can directly call our apis.
 since this is runing on single cluster the ip of node will be same as the minukube ip.
-(didnot work)
+(did not work)
+
 ![alt text](image-13.png)
 
 - Accessing the application by service name 
@@ -387,6 +420,7 @@ C:\Users\ashfa>curl http://127.0.0.1:59447/helloworld
 helloworld
 C:\Users\ashfa>
 ```
+
 ![alt text](image-14.png)
 
 - K8s dashboard:
@@ -395,6 +429,7 @@ C:\Users\ashfa>
 ![alt text](image-16.png)
 
 - deployment object we created.
+
 ![alt text](image-17.png)
 - Pods.
 ![alt text](image-18.png)

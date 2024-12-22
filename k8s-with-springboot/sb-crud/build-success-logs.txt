@@ -1,0 +1,96 @@
+   - Eclipse  Maven clean install (with skip test) 
+   so now the code when building will not to connect to the DB, as we have provided the dynamic values .
+
+
+[INFO] Scanning for projects...
+[WARNING] The requested profile "pom.xml" could not be activated because it does not exist.
+[INFO] 
+[INFO] [1m----------------< [0;36mcom.example.demo:sb-crud-k8s-sample[0;1m >-----------------[m
+[INFO] [1mBuilding sb-crud-k8s-sample 0.0.1-SNAPSHOT[m
+[INFO]   from pom.xml
+[INFO] [1m--------------------------------[ jar ]---------------------------------[m
+[INFO] 
+[INFO] [1m--- [0;32mclean:3.4.0:clean[m [1m(default-clean)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Deleting C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target
+[INFO] 
+[INFO] [1m--- [0;32mresources:3.3.1:resources[m [1m(default-resources)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] [1m--- [0;32mcompiler:3.13.0:compile[m [1m(default-compile)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Recompiling the module because of [1mchanged source code[m.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target\classes
+[INFO] 
+[INFO] [1m--- [0;32mresources:3.3.1:testResources[m [1m(default-testResources)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Not copying test resources
+[INFO] 
+[INFO] [1m--- [0;32mcompiler:3.13.0:testCompile[m [1m(default-testCompile)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] [1m--- [0;32msurefire:3.5.2:test[m [1m(default-test)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] [1m--- [0;32mjar:3.4.2:jar[m [1m(default-jar)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Building jar: C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar
+[INFO] 
+[INFO] [1m--- [0;32mspring-boot:3.4.1:repackage[m [1m(repackage)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Replacing main artifact C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar.original
+[INFO] 
+[INFO] [1m--- [0;32minstall:3.1.3:install[m [1m(default-install)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Installing C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\pom.xml to C:\Users\ashfa\.m2\repository\com\example\demo\sb-crud-k8s-sample\0.0.1-SNAPSHOT\sb-crud-k8s-sample-0.0.1-SNAPSHOT.pom
+[INFO] Installing C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar to C:\Users\ashfa\.m2\repository\com\example\demo\sb-crud-k8s-sample\0.0.1-SNAPSHOT\sb-crud-k8s-sample-0.0.1-SNAPSHOT.jar
+[INFO] [1m------------------------------------------------------------------------[m
+[INFO] [1;32mBUILD SUCCESS[m
+[INFO] [1m------------------------------------------------------------------------[m
+[INFO] Total time:  4.133 s
+[INFO] Finished at: 2024-12-22T10:50:58+05:30
+[INFO] [1m------------------------------------------------------------------------[m
+[WARNING] The requested profile "pom.xml" could not be activated because it does not exist.
+
+
+
+- Eclipse  Maven clean package (with skip test) 
+   so now the code when building will not to connect to the DB, as we have provided the dynamic values .
+
+[INFO] Scanning for projects...
+[WARNING] The requested profile "pom.xml" could not be activated because it does not exist.
+[INFO] 
+[INFO] [1m----------------< [0;36mcom.example.demo:sb-crud-k8s-sample[0;1m >-----------------[m
+[INFO] [1mBuilding sb-crud-k8s-sample 0.0.1-SNAPSHOT[m
+[INFO]   from pom.xml
+[INFO] [1m--------------------------------[ jar ]---------------------------------[m
+[INFO] 
+[INFO] [1m--- [0;32mclean:3.4.0:clean[m [1m(default-clean)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Deleting C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target
+[INFO] 
+[INFO] [1m--- [0;32mresources:3.3.1:resources[m [1m(default-resources)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] [1m--- [0;32mcompiler:3.13.0:compile[m [1m(default-compile)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Recompiling the module because of [1mchanged source code[m.
+[INFO] Compiling 5 source files with javac [debug parameters release 21] to target\classes
+[INFO] 
+[INFO] [1m--- [0;32mresources:3.3.1:testResources[m [1m(default-testResources)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Not copying test resources
+[INFO] 
+[INFO] [1m--- [0;32mcompiler:3.13.0:testCompile[m [1m(default-testCompile)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] [1m--- [0;32msurefire:3.5.2:test[m [1m(default-test)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] [1m--- [0;32mjar:3.4.2:jar[m [1m(default-jar)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Building jar: C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar
+[INFO] 
+[INFO] [1m--- [0;32mspring-boot:3.4.1:repackage[m [1m(repackage)[m @ [36msb-crud-k8s-sample[0;1m ---[m
+[INFO] Replacing main artifact C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\sb-crud-k8s-sample\target\sb3crud-k8s.jar.original
+[INFO] [1m------------------------------------------------------------------------[m
+[INFO] [1;32mBUILD SUCCESS[m
+[INFO] [1m------------------------------------------------------------------------[m
+[INFO] Total time:  3.075 s
+[INFO] Finished at: 2024-12-22T10:52:39+05:30
+[INFO] [1m------------------------------------------------------------------------[m
+[WARNING] The requested profile "pom.xml" could not be activated because it does not exist.
