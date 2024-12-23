@@ -20,6 +20,8 @@ C:\Users\ashfa>npm -v
 ## Update vite config to support Docker
 To run your React app in a Docker container, you need to update the vite config file to support Docker. Open the vite.config.js file and add the following code:
 
+
+
 ```
 export default {
   server: {
@@ -27,7 +29,10 @@ export default {
   },
 };
 ```
+
 - Test the application.
+- Build the application.
+
 ## Create the Dockerfile
 ```
 # Use an official Node.js runtime as a parent image
@@ -63,65 +68,38 @@ dist
 - From terminal build the docker image.
 ```
 
-
-C:\Users\ashfa\OneDrive\Desktop\My-Learning\k8s\kubernetes\k8s-with-react\simple-react-app>docker build -t vite-react-app:v1  .  
-[+] Building 1.2s (10/10) FINISHED                                                                         docker:desktop-linux
+C:\Users\ashfa\OneDrive\Desktop\My-Learning\k8s\kubernetes\k8s-with-react\simple-react-app>docker build -t darksharkash/vite-react-app:v1  .  
+[+] Building 2.2s (11/11) FINISHED                                                                         docker:desktop-linux
  => [internal] load build definition from Dockerfile                                                                       0.0s
- => => transferring dockerfile: 492B                                                                                       0.0s
- => [internal] load metadata for docker.io/library/node:20-alpine                                                          1.0s
+ => => transferring dockerfile: 492B                                                                                       0.0s 
+ => [internal] load metadata for docker.io/library/node:20-alpine                                                          2.1s 
+ => [auth] library/node:pull token for registry-1.docker.io                                                                0.0s
  => [internal] load .dockerignore                                                                                          0.0s
- => => transferring context: 64B                                                                                           0.0s
- => [1/5] FROM docker.io/library/node:20-alpine@sha256:426f843809ae05f324883afceebaa2b9cab9cb697097dbb1a2a7a41c5701de72    0.0s
- => [internal] load build context                                                                                          0.0s
- => => transferring context: 1.24kB                                                                                        0.0s
- => CACHED [2/5] WORKDIR /app                                                                                              0.0s
- => CACHED [3/5] COPY package*.json ./                                                                                     0.0s
- => CACHED [4/5] RUN npm install                                                                                           0.0s
- => [5/5] COPY . .                                                                                                         0.0s
- => => transferring context: 64B                                                                                           0.0s
- => [1/5] FROM docker.io/library/node:20-alpine@sha256:426f843809ae05f324883afceebaa2b9cab9cb697097dbb1a2a7a41c5701de72    0.0s
- => [internal] load build context                                                                                          0.0s
- => => transferring context: 1.24kB                                                                                        0.0s
- => CACHED [2/5] WORKDIR /app                                                                                              0.0s
- => CACHED [3/5] COPY package*.json ./                                                                                     0.0s
- => CACHED [4/5] RUN npm install                                                                                           0.0s
- => [5/5] COPY . .                                                                                                         0.0s
- => [internal] load build context                                                                                          0.0s
- => => transferring context: 1.24kB                                                                                        0.0s
- => CACHED [2/5] WORKDIR /app                                                                                              0.0s
- => CACHED [3/5] COPY package*.json ./                                                                                     0.0s
- => CACHED [4/5] RUN npm install                                                                                           0.0s
- => [5/5] COPY . .                                                                                                         0.0s
- => => transferring context: 1.24kB                                                                                        0.0s
- => CACHED [2/5] WORKDIR /app                                                                                              0.0s
- => CACHED [3/5] COPY package*.json ./                                                                                     0.0s
- => CACHED [4/5] RUN npm install                                                                                           0.0s
- => [5/5] COPY . .                                                                                                         0.0s
- => exporting to image                                                                                                     0.0s
- => => exporting layers                                                                                                    0.0s
- => CACHED [4/5] RUN npm install                                                                                           0.0s
- => [5/5] COPY . .                                                                                                         0.0s
- => exporting to image                                                                                                     0.0s
- => => exporting layers                                                                                                    0.0s
- => exporting to image                                                                                                     0.0s
- => => exporting layers                                                                                                    0.0s
- => => writing image sha256:d0cd0356e83aa429b2d62c88d728bf07347cb03225a2c67115082cbf695e5414                               0.0s
- => => writing image sha256:d0cd0356e83aa429b2d62c88d728bf07347cb03225a2c67115082cbf695e5414                               0.0s
- => => naming to docker.io/library/vite-react-app:v1                                                                       0.0s
+ => => transferring context: 64B                                                                                           0.0s 
+ => [1/5] FROM docker.io/library/node:20-alpine@sha256:426f843809ae05f324883afceebaa2b9cab9cb697097dbb1a2a7a41c5701de72    0.0s 
+ => [internal] load build context                                                                                          0.0s 
+ => => transferring context: 1.61kB                                                                                        0.0s 
+ => CACHED [2/5] WORKDIR /app                                                                                              0.0s 
+ => CACHED [3/5] COPY package*.json ./                                                                                     0.0s 
+ => CACHED [4/5] RUN npm install                                                                                           0.0s 
+ => [5/5] COPY . .                                                                                                         0.0s 
+ => exporting to image                                                                                                     0.0s 
+ => => exporting layers                                                                                                    0.0s 
+ => => writing image sha256:eae90fc8d71db2a540ab590bca8c8c943e421c9dc4059de75f38717e24c1f13d                               0.0s 
+ => => naming to docker.io/darksharkash/vite-react-app:v1                                                                  0.0s 
 
-View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/pu1580eu0rn3cvlo9vnaf6qlh
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/9corkta9fxhk393dl40msp1vo
 
-What's next:
-    View a summary of image vulnerabilities and recommendations → docker scout quickview
 
-C:\Users\ashfa\OneDrive\Desktop\My-Learning\k8s\kubernetes\k8s-with-react\simple-react-app>
+- Push the image to docker repo.
+
 
 ```
 
 
 - Run the docker image 
 ```
-C:\Users\ashfa>docker run -p 5173:5173 vite-react-app:v1
+C:\Users\ashfa>docker run -p 5173:5173 darksharkash/vite-react-app:v1
 
 > simple-react-app@0.0.0 dev
 > vite
@@ -156,3 +134,7 @@ C:\Users\ashfa>docker run -p 5174:5173 vite-react-app:v1
 
 ```
 ![alt text](image-1.png)
+
+
+## Note: 
+We have not created the docker image from the build.

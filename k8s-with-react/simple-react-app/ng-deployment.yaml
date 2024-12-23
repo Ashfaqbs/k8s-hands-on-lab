@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vite-react-app-deployment
+  labels:
+    app: vite-react-app
+spec:
+  replicas: 2 # Number of pods
+  selector:
+    matchLabels:
+      app: vite-react-app
+  template:
+    metadata:
+      labels:
+        app: vite-react-app
+    spec:
+      containers:
+      - name: reactapp
+        image: darksharkash/vite-react-app:v1 # our Docker image
+        ports:
+        - containerPort: 5173 # Exposed port in the container
+        imagePullPolicy: IfNotPresent # Ensure the image is not pulled from a remote registry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vite-react-app-service
+spec:
+  selector:
+    app: vite-react-app
+  ports:
+    - protocol: TCP
+      port: 80 # External port
+      targetPort: 80   # The port exposed by the service
+      nodePort: 31000
+  type: NodePort # Exposes the service to the host machine
