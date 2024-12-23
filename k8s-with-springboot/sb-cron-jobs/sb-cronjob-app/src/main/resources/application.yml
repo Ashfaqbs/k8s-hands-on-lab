@@ -1,0 +1,12 @@
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: REDACTED_EMAIL
+    password: REDACTED_APP_PASSWORD
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

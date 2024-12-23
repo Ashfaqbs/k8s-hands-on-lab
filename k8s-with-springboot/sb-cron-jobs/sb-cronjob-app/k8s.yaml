@@ -1,0 +1,17 @@
+apiVersion: batch/v1 
+kind: CronJob # Kubernetes resource kind we are creating, CronJob is a k8s object
+metadata:
+  name: sb-cron-job # name of the CronJob
+spec:
+  schedule: "*/2 * * * *" # cron schedule this will run every 2 mins
+  successfulJobsHistoryLimit: 1 # Number of successful jobs to keep
+  failedJobsHistoryLimit: 5 # Number of failed jobs to keep IMP this clears the pods , as new pods are created as per cron
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sb-cron-job
+              image: darksharkash/sb-cron-app:v1
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
