@@ -169,3 +169,247 @@ C:\Users\ashfa>minikube dashboard
 - mail:
 
 ![alt text](image-6.png)
+
+## Observation:
+Every time the cron schedule triggers (e.g., every two minutes), Kubernetes creates a new Pod. This new Pod runs your application, and since your Spring Boot app is designed to execute the function once on startup, the function gets called every time the Pod is created. 
+
+
+1. **Handling Overlapping Pods**: By default, Kubernetes allows Pods to overlap, meaning if the previous Pod is still running when the next CronJob is triggered, the new Pod will still start. However, we can control this behavior using the `concurrencyPolicy` field in the CronJob YAML:
+   - **Forbid**: Ensures that if a previous Pod is still running, the next scheduled job won't start.
+   - **Replace**: Stops the currently running Pod and replaces it with a new one.
+
+2. **Pod Lifecycle**: Once a Pod completes its execution (i.e., our application finishes its one-time function call), it moves to the `Completed` state. However, it remains in the cluster unless explicitly cleaned up. To avoid resource consumption:
+   - Use `successfulJobsHistoryLimit` and `failedJobsHistoryLimit` to automatically delete old job metadata after a certain number of jobs.
+   - Set `ttlSecondsAfterFinished` to define how long Kubernetes should keep the Pod after it finishes. For example, `ttlSecondsAfterFinished: 60` will delete the Pod one minute after it completes.
+
+3. **Resource Consumption**: To optimize resource usage:
+   - Set `restartPolicy: Never` in the Job spec, so the Pod won't restart on failure.
+   - Ensure that resource requests/limits are defined in the YAML, so the Pod doesn’t consume unnecessary CPU or memory.
+
+eg YAML
+```
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: example-cronjob
+spec:
+  # Schedule the job to run every 2 minutes
+  schedule: "*/2 * * * *"
+  
+  # Concurrency policy to forbid overlapping runs (i.e., only one pod running at a time)
+  concurrencyPolicy: Forbid
+  
+  # How many successful jobs to keep in the history
+  successfulJobsHistoryLimit: 3
+  
+  # How many failed jobs to keep in the history
+  failedJobsHistoryLimit: 1
+
+  # How long to keep the Pod after it finishes (TTL for completed Pods)
+  ttlSecondsAfterFinished: 60  # Delete the Pod 1 minute after completion
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: your-springboot-app
+            # Define the Docker image to use for the Pod
+            image: your-docker-image
+            command: ["java", "-jar", "your-app.jar"]  # The command to run in the container
+            resources:
+              # Define resource requests and limits
+              requests:
+                memory: "64Mi"
+                cpu: "250m"
+              limits:
+                memory: "128Mi"
+                cpu: "500m"
+          restartPolicy: Never  # Don't restart the Pod once it finishes
+
+```
+
+Excellent question, Mohammed Ashfaq! Let's break it down step by step:
+
+### How Kubernetes Knows When a Container Is Completed
+
+1. **Container Exit Code**:
+   - When the application (inside the container) completes its execution, the container process exits with an **exit code**. 
+   - If the process completes successfully, it typically exits with `exit code 0`.
+   - Kubernetes monitors the container's status and checks the exit code to determine if it finished successfully.
+
+2. **Pod Phase Tracking**:
+   - Kubernetes tracks the lifecycle of a Pod. Once the container inside the Pod completes, the Pod moves to the `Succeeded` or `Failed` phase based on the exit code.
+   - If a Pod reaches the `Succeeded` phase, Kubernetes considers the Pod's job done.
+
+3. **Job and CronJob Behavior**:
+   - For a **Job** (or CronJob), Kubernetes relies on the Pod's `Succeeded` status to know the task is complete.
+   - The CronJob's `concurrencyPolicy` (e.g., `Forbid`) ensures that if a job's Pod hasn't completed, Kubernetes won't start a new Pod for the next Cron trigger.
+
+### In Our Case: The Spring Boot Application Inside the Container
+
+When we containerize our Spring Boot application:
+1. The logic (e.g., calling a function on application start) runs **once** when the application starts.
+2. Once the logic completes, the `java` process inside the container exits with a status code of `0`.
+3. Kubernetes detects the container's exit status and marks the Pod as `Succeeded`.
+
+If the Pod finishes before the next CronJob schedule, Kubernetes is ready to create a new Pod. However:
+- If the Pod is still running, the `concurrencyPolicy` (e.g., `Forbid`) ensures no new Pod starts until the running one finishes.
+
+### Example Workflow:
+1. **Cron Schedule**: The CronJob is set to run every 2 minutes.
+2. **Pod Lifecycle**:
+   - At `T=0`: Kubernetes starts a Pod.
+   - The Pod runs the containerized Spring Boot application.
+   - The application calls the function once and exits.
+   - Kubernetes marks the Pod as `Succeeded`.
+3. **Next Run**:
+   - At `T=2`: Kubernetes starts a new Pod, repeating the process.
+
+If the first Pod hasn’t completed by `T=2`:
+- If `concurrencyPolicy: Forbid`, the new job won’t start.
+- If `concurrencyPolicy: Allow`, Kubernetes will create a new Pod regardless of the previous one.
+
+### Key Insight:
+Kubernetes doesn’t care about what’s inside the container; it only looks at the process’s exit status and Pod lifecycle state to manage CronJob executions.
+
+
+
+## Template Explanation for CronJob YAML
+
+ ```
+ apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: <name-of-your-cronjob>  # Define a name for the CronJob
+spec:
+  schedule: "<cron-expression>"  # Cron expression defining the schedule (e.g., "*/2 * * * *" for every 2 minutes)
+  
+  concurrencyPolicy: <Forbid|Replace|Allow>  # Controls whether overlapping jobs are allowed. "Forbid" means no overlap.
+
+  successfulJobsHistoryLimit: <number>  # Limit on how many successful job records are kept
+  failedJobsHistoryLimit: <number>  # Limit on how many failed job records are kept
+  
+  ttlSecondsAfterFinished: <seconds>  # Defines how long to keep completed Pods (time-to-live for finished Pods)
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: <container-name>  # Name of the container
+            image: <docker-image>  # Docker image for the container (your Spring Boot app)
+            command: ["<command-to-run>"]  # The command to run inside the container (e.g., running the Spring Boot app)
+            resources:
+              requests:
+                memory: "<memory-request>"
+                cpu: "<cpu-request>"
+              limits:
+                memory: "<memory-limit>"
+                cpu: "<cpu-limit>"
+          restartPolicy: Never  # Don't restart the Pod once it completes or fails
+
+ ```
+
+ Here’s the breakdown for what you're asking about:
+
+### Kubernetes CronJob Example YAML with Resource Management and Cleanup
+
+This YAML configuration includes both resource management and Pod cleanup settings:
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: example-cronjob
+spec:
+  # Schedule the job to run every 2 minutes
+  schedule: "*/2 * * * *"
+  
+  # Concurrency policy to forbid overlapping runs (i.e., only one pod running at a time)
+  concurrencyPolicy: Forbid
+  
+  # How many successful jobs to keep in the history
+  successfulJobsHistoryLimit: 3
+  
+  # How many failed jobs to keep in the history
+  failedJobsHistoryLimit: 1
+
+  # How long to keep the Pod after it finishes (TTL for completed Pods)
+  ttlSecondsAfterFinished: 60  # Delete the Pod 1 minute after completion
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: your-springboot-app
+            # Define the Docker image to use for the Pod
+            image: your-docker-image
+            command: ["java", "-jar", "your-app.jar"]  # The command to run in the container
+            resources:
+              # Define resource requests and limits
+              requests:
+                memory: "64Mi"
+                cpu: "250m"
+              limits:
+                memory: "128Mi"
+                cpu: "500m"
+          restartPolicy: Never  # Don't restart the Pod once it finishes
+```
+
+### Template Explanation for CronJob YAML
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: <name-of-your-cronjob>  # Define a name for the CronJob
+spec:
+  schedule: "<cron-expression>"  # Cron expression defining the schedule (e.g., "*/2 * * * *" for every 2 minutes)
+  
+  concurrencyPolicy: <Forbid|Replace|Allow>  # Controls whether overlapping jobs are allowed. "Forbid" means no overlap.
+
+  successfulJobsHistoryLimit: <number>  # Limit on how many successful job records are kept
+  failedJobsHistoryLimit: <number>  # Limit on how many failed job records are kept
+  
+  ttlSecondsAfterFinished: <seconds>  # Defines how long to keep completed Pods (time-to-live for finished Pods)
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: <container-name>  # Name of the container
+            image: <docker-image>  # Docker image for the container (your Spring Boot app)
+            command: ["<command-to-run>"]  # The command to run inside the container (e.g., running the Spring Boot app)
+            resources:
+              requests:
+                memory: "<memory-request>"
+                cpu: "<cpu-request>"
+              limits:
+                memory: "<memory-limit>"
+                cpu: "<cpu-limit>"
+          restartPolicy: Never  # Don't restart the Pod once it completes or fails
+```
+
+### Breakdown of Key Sections:
+1. **`schedule`**: Defines when the job should run using a cron expression. For example, `"*/2 * * * *"` runs the job every 2 minutes.
+2. **`concurrencyPolicy`**: Controls how Kubernetes handles overlapping job executions.  
+   - `Forbid`: Prevents new jobs from starting if the previous one hasn’t finished.
+   - `Replace`: Stops the running job and starts a new one.
+   - `Allow`: Allows multiple jobs to run in parallel.
+3. **`successfulJobsHistoryLimit`**: Limits the number of successful job records to keep.
+4. **`failedJobsHistoryLimit`**: Limits the number of failed job records to keep.
+5. **`ttlSecondsAfterFinished`**: Automatically deletes the Pod after it finishes, helping clean up resources.
+6. **`jobTemplate`**: Defines the Pod template, specifying the container (your Spring Boot application), command to run, and resource limits.
+   - `resources.requests`: What Kubernetes should reserve for the Pod to run (memory and CPU).
+   - `resources.limits`: The maximum allowed resource usage for the Pod.
+
+### Additional Notes:
+- **Image**: The Docker image for your Spring Boot app (e.g., `your-docker-image`).
+- **Resources**: This section helps manage the Pod’s resource consumption (like CPU and memory).
+- **restartPolicy: Never**: Ensures that Kubernetes doesn’t try to restart the Pod once it’s completed, keeping it idle until the next CronJob trigger.
+
+
+
