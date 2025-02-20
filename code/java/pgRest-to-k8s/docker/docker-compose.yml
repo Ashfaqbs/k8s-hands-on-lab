@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  postgrest:
+    image: postgrest/postgrest
+    environment:
+      PGRST_DB_URI: "postgres://postgres:admin@host.docker.internal:9991/mainschema"
+      PGRST_DB_SCHEMA: "public"
+      PGRST_DB_ANON_ROLE: "postgres"
+    ports:
+      - "3000:3000"
+
+
+## We created anon role in the database but now we are using priveleged role 
