@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-kafka-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-kafka-app
+  template:
+    metadata:
+      labels:
+        app: springboot-kafka-app
+    spec:
+      containers:
+      - name: springboot-kafka-app
+        image: darksharkash/springboot-kafka-app:latest
+        ports:
+        - containerPort: 8080
+        env:
+          # Use Kafka's service name and internal port
+          - name: KAFKA_BOOTSTRAP_SERVERS
+            value: "kafka:9093"
