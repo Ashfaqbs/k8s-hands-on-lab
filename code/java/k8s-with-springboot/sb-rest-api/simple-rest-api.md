@@ -400,7 +400,7 @@ springboot-k8s-service   NodePort    10.98.157.147   <none>        8080:31346/TC
 
 We can access the application by Node IP and Node Port. from this we can directly call our apis.
 since this is runing on single cluster the ip of node will be same as the minukube ip.
-(did not work)
+(did not work in windows but worked in linux virtual box)
 
 ![alt text](image-13.png)
 
