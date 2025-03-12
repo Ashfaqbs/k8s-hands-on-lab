@@ -1,0 +1,338 @@
+clear reousrces like deployment, service, configmap,pvc post task
+configmap we are using for app only for essential  and non-secrets stuff like host and 
+schema etc... we canuse the configmap yaml for Db yaml as well.
+and we will use secrets for username, passwords etc.....
+
+
+
+
+┌──(ashu㉿kali)-[~/…/code/k8s/practise/sb-crud]
+└─$ cd with-CM-and-secrets 
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ ls
+app-deployment.yaml  db-configmap.yaml  db-deployment.yaml  db-secret.yaml  note.txt
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-configmap.yaml   
+configmap/db-config created
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-secret.yaml   
+^[[Dsecret/mysql-secrets created
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-deployment.yaml 
+persistentvolumeclaim/mysql-pv-claim created
+deployment.apps/mysql created
+service/mysql created
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f app-deployment.yaml  
+deployment.apps/springboot-crud-deployment created
+service/springboot-crud-svc created
+                                                                                             
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ 
+
+
+
+
+──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get  configmap             
+NAME               DATA   AGE
+db-config          2      2m11s
+kube-root-ca.crt   1      18d
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get secrets                
+NAME            TYPE     DATA   AGE
+mysql-secrets   Opaque   2      106s
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl describe secrets
+Name:         mysql-secrets
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+password:  4 bytes
+username:  4 bytes
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl describe  configmap db-config
+Name:         db-config
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+host:
+----
+mysql
+
+dbName:
+----
+tempSchema
+
+
+BinaryData
+====
+
+Events:  <none>
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get deployments              
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+mysql                        1/1     1            1           2m18s
+springboot-crud-deployment   3/3     3            3           2m5s
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get services    
+NAME                  TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1      <none>        443/TCP          18d
+mysql                 ClusterIP   None           <none>        3306/TCP         2m27s
+springboot-crud-svc   NodePort    10.101.30.44   <none>        8080:32241/TCP   2m14s
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kuebctl get pods     
+kuebctl: command not found
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get pods
+NAME                                          READY   STATUS    RESTARTS   AGE
+mysql-577c45786b-998mz                        1/1     Running   0          2m44s
+springboot-crud-deployment-758fb9bb68-2lb4z   1/1     Running   0          2m32s
+springboot-crud-deployment-758fb9bb68-gj722   1/1     Running   0          2m32s
+springboot-crud-deployment-758fb9bb68-tfhdz   1/1     Running   0          2m32s
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 
+
+
+
+
+
+
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl logs springboot-crud-deployment-758fb9bb68-2lb4z
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.1)
+
+2025-03-12T11:49:48.294Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : Starting SbCrudK8sSampleApplication v0.0.1-SNAPSHOT using Java 21.0.5 with PID 1 (/app/app.jar started by root in /app)
+2025-03-12T11:49:48.343Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-03-12T11:49:59.315Z  INFO 1 --- [sb-crud-k8s-sample] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-12T11:49:59.862Z  INFO 1 --- [sb-crud-k8s-sample] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 347 ms. Found 1 JPA repository interface.
+2025-03-12T11:50:05.156Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-03-12T11:50:05.514Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-03-12T11:50:05.515Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-03-12T11:50:05.625Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-03-12T11:50:05.636Z  INFO 1 --- [sb-crud-k8s-sample] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 17206 ms
+2025-03-12T11:50:07.520Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-12T11:50:07.769Z  INFO 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.4.Final
+2025-03-12T11:50:08.092Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-03-12T11:50:11.030Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-03-12T11:50:11.346Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12T11:50:13.684Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1f45db49
+2025-03-12T11:50:13.691Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12T11:50:13.907Z  WARN 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-03-12T11:50:13.963Z  WARN 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-03-12T11:50:14.090Z  INFO 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 5.7.44
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-03-12T11:50:22.715Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-03-12T11:50:22.909Z  INFO 1 --- [sb-crud-k8s-sample] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-12T11:50:24.139Z  WARN 1 --- [sb-crud-k8s-sample] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-03-12T11:50:28.101Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-03-12T11:50:28.585Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : Started SbCrudK8sSampleApplication in 45.422 seconds (process running for 53.444)
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl exec -it mysql-577c45786b-998mb -- /bin/bash 
+Error from server (NotFound): pods "mysql-577c45786b-998mb" not found
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl exec -it mysql-577c45786b-998mz -- /bin/bash 
+bash-4.2# mysql -h mysql -u root -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 32
+Server version: 5.7.44 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| tempSchema         |
++--------------------+
+5 rows in set (0.05 sec)
+
+mysql> use tempSchema;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++----------------------+
+| Tables_in_tempSchema |
++----------------------+
+| user                 |
++----------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from user;
++----+-----+-----------------+----------+
+| id | age | email           | name     |
++----+-----+-----------------+----------+
+|  2 |   2 | email@gmail.com | name1ONE |
+|  3 |   2 | email@gmail.com | name1ONE |
++----+-----+-----------------+----------+
+2 rows in set (0.00 sec)
+
+mysql> select * from user;
++----+-----+-----------------+------------------+
+| id | age | email           | name             |
++----+-----+-----------------+------------------+
+|  3 |   2 | email@gmail.com | name1ONE         |
+|  4 |   2 | email@gmail.com | name1ONE updated |
++----+-----+-----------------+------------------+
+2 rows in set (0.01 sec)
+
+mysql> 
+
+
+
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get services  
+NAME                  TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1      <none>        443/TCP          18d
+mysql                 ClusterIP   None           <none>        3306/TCP         6m53s
+springboot-crud-svc   NodePort    10.101.30.44   <none>        8080:32241/TCP   6m40s
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ minikube ip    
+192.168.49.2
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ minikube service springboot-crud-svc --url
+http://192.168.49.2:32241
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 
+
+Tested working fine
+
+
+
+
+Delteing the resources
+
+
+
+
+
+
+──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get services 
+NAME                  TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1      <none>        443/TCP          18d
+mysql                 ClusterIP   None           <none>        3306/TCP         10m
+springboot-crud-svc   NodePort    10.101.30.44   <none>        8080:32241/TCP   10m
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete services mysql springboot-crud-svc
+service "mysql" deleted
+service "springboot-crud-svc" deleted
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete deployment mysql                   
+deployment.apps "mysql" deleted
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get deployments                          
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+springboot-crud-deployment   3/3     3            3           10m
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete deployment springboot-crud-deployment
+deployment.apps "springboot-crud-deployment" deleted
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get deployments                              
+No resources found in default namespace.
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get services                               
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   18d
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get pods     
+No resources found in default namespace.
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get pvc  
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+mysql-pv-claim   Bound    pvc-44a80ec2-59e0-4acc-ab40-df112366dee6   1Gi        RWO            standard       <unset>                 12m
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete pvc mysql-pv-claim                   
+persistentvolumeclaim "mysql-pv-claim" deleted
+                                                                                                                                                                                                                                    
+
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get configmap 
+NAME               DATA   AGE
+db-config          2      13m
+kube-root-ca.crt   1      18d
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete configmap db-config
+configmap "db-config" deleted
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get services               
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   18d
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get secrets 
+NAME            TYPE     DATA   AGE
+mysql-secrets   Opaque   2      13m
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete secrets mysql-secrets
+secret "mysql-secrets" deleted
+                                                                                                                                                                                                                                    
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 
+

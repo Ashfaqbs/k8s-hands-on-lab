@@ -1,0 +1,70 @@
+we will update only app yaml file but we can aslo apply the db yaml file 
+
+
+
+commands:
+
+kubectl apply -f db-configmap.yaml
+
+
+
+
+──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-configmap]
+└─$ kubectl apply -f db-configmap.yaml
+
+configmap/db-config created
+                                                                                       
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-configmap]
+└─$ kubectl get configmap
+
+NAME               DATA   AGE
+db-config          2      12s
+kube-root-ca.crt   1      17d
+                                                                                       
+
+
+
+
+
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl describe configmap db-config
+
+Name:         db-config
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+dbName:
+----
+tempSchema
+
+host:
+----
+mysql
+
+
+BinaryData
+====
+
+Events:  <none>
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 
+
+
+
+──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete configmap db-config
+
+configmap "db-config" deleted
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get  configmap       
+NAME               DATA   AGE
+kube-root-ca.crt   1      18d
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 

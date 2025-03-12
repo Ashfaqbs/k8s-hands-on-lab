@@ -1,0 +1,300 @@
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-secret.yaml -n dev
+secret/mysql-secrets created
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-configmap.yaml -n dev 
+configmap/db-config created
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f db-deployment.yaml -n dev 
+persistentvolumeclaim/mysql-pv-claim created
+deployment.apps/mysql created
+service/mysql created
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl apply -f app-deployment.yaml -n dev 
+deployment.apps/springboot-crud-deployment created
+service/springboot-crud-svc created
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get                                
+You must specify the type of resource to get. Use "kubectl api-resources" for a complete list of supported resources.
+
+error: Required resource not specified.
+Use "kubectl explain <resource>" for a detailed description of that resource (e.g. kubectl explain pods).
+See 'kubectl get -h' for help and examples
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get configmap
+
+NAME               DATA   AGE
+kube-root-ca.crt   1      18d
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get services 
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   18d
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pods                                                 
+No resources found in default namespace.
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pods -n all
+No resources found in all namespace.
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pvc                                                  
+No resources found in default namespace.
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pv 
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM                    STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+pvc-8a20db00-63d4-4c3b-ac44-f06cc7529fc4   1Gi        RWO            Delete           Bound      dev/mysql-pv-claim       standard       <unset>                          2m10s
+pvc-f4e4ec6a-bc00-4d34-869d-2a35952c61eb   1Gi        RWO            Delete           Released   default/mysql-pv-claim   standard       <unset>                          11h
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pods -n dev
+NAME                                          READY   STATUS    RESTARTS   AGE
+mysql-577c45786b-d2s4k                        1/1     Running   0          2m27s
+springboot-crud-deployment-758fb9bb68-8vvlh   1/1     Running   0          2m18s
+springboot-crud-deployment-758fb9bb68-xh8j5   1/1     Running   0          2m18s
+springboot-crud-deployment-758fb9bb68-z9m68   1/1     Running   0          2m19s
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl logs mysql-577c45786b-d2s4k -n dev                                           
+2025-03-12 15:53:05+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 5.7.44-1.el7 started.
+2025-03-12 15:53:06+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+2025-03-12 15:53:06+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 5.7.44-1.el7 started.
+2025-03-12 15:53:06+00:00 [Note] [Entrypoint]: Initializing database files
+2025-03-12T15:53:06.279495Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
+2025-03-12T15:53:06.588603Z 0 [Warning] InnoDB: New log files created, LSN=45790
+2025-03-12T15:53:06.698590Z 0 [Warning] InnoDB: Creating foreign key constraint system tables.
+2025-03-12T15:53:06.722349Z 0 [Warning] No existing UUID has been found, so we assume that this is the first time that this server has been started. Generating a new UUID: 16d8d515-ff5a-11ef-b546-623409601104.
+2025-03-12T15:53:06.725106Z 0 [Warning] Gtid table is not ready to be used. Table 'mysql.gtid_executed' cannot be opened.
+2025-03-12T15:53:06.853075Z 0 [Warning] A deprecated TLS version TLSv1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:06.853172Z 0 [Warning] A deprecated TLS version TLSv1.1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:06.853826Z 0 [Warning] CA certificate ca.pem is self signed.
+2025-03-12T15:53:06.951003Z 1 [Warning] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+2025-03-12 15:53:09+00:00 [Note] [Entrypoint]: Database files initialized
+2025-03-12 15:53:09+00:00 [Note] [Entrypoint]: Starting temporary server
+2025-03-12 15:53:09+00:00 [Note] [Entrypoint]: Waiting for server startup
+2025-03-12T15:53:10.052876Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
+2025-03-12T15:53:10.061459Z 0 [Note] mysqld (mysqld 5.7.44) starting as process 126 ...
+2025-03-12T15:53:10.069569Z 0 [Note] InnoDB: PUNCH HOLE support available
+2025-03-12T15:53:10.069662Z 0 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2025-03-12T15:53:10.069667Z 0 [Note] InnoDB: Uses event mutexes
+2025-03-12T15:53:10.069668Z 0 [Note] InnoDB: GCC builtin __atomic_thread_fence() is used for memory barrier
+2025-03-12T15:53:10.069684Z 0 [Note] InnoDB: Compressed tables use zlib 1.2.13
+2025-03-12T15:53:10.069698Z 0 [Note] InnoDB: Using Linux native AIO
+2025-03-12T15:53:10.070710Z 0 [Note] InnoDB: Number of pools: 1
+2025-03-12T15:53:10.071166Z 0 [Note] InnoDB: Using CPU crc32 instructions
+2025-03-12T15:53:10.078504Z 0 [Note] InnoDB: Initializing buffer pool, total size = 128M, instances = 1, chunk size = 128M
+2025-03-12T15:53:10.113086Z 0 [Note] InnoDB: Completed initialization of buffer pool
+2025-03-12T15:53:10.124549Z 0 [Note] InnoDB: If the mysqld execution user is authorized, page cleaner thread priority can be changed. See the man page of setpriority().
+2025-03-12T15:53:10.145282Z 0 [Note] InnoDB: Highest supported file format is Barracuda.
+2025-03-12T15:53:10.173339Z 0 [Note] InnoDB: Creating shared tablespace for temporary tables
+2025-03-12T15:53:10.173439Z 0 [Note] InnoDB: Setting file './ibtmp1' size to 12 MB. Physically writing the file full; Please wait ...
+2025-03-12T15:53:10.227613Z 0 [Note] InnoDB: File './ibtmp1' size is now 12 MB.
+2025-03-12T15:53:10.228206Z 0 [Note] InnoDB: 96 redo rollback segment(s) found. 96 redo rollback segment(s) are active.
+2025-03-12T15:53:10.228254Z 0 [Note] InnoDB: 32 non-redo rollback segment(s) are active.
+2025-03-12T15:53:10.234921Z 0 [Note] InnoDB: 5.7.44 started; log sequence number 2768291
+2025-03-12T15:53:10.235353Z 0 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
+2025-03-12T15:53:10.235605Z 0 [Note] Plugin 'FEDERATED' is disabled.
+2025-03-12T15:53:10.237083Z 0 [Note] InnoDB: Buffer pool(s) load completed at 250312 15:53:10
+2025-03-12T15:53:10.260512Z 0 [Note] Found ca.pem, server-cert.pem and server-key.pem in data directory. Trying to enable SSL support using them.
+2025-03-12T15:53:10.260574Z 0 [Note] Skipping generation of SSL certificates as certificate files are present in data directory.
+2025-03-12T15:53:10.260579Z 0 [Warning] A deprecated TLS version TLSv1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:10.260580Z 0 [Warning] A deprecated TLS version TLSv1.1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:10.261010Z 0 [Warning] CA certificate ca.pem is self signed.
+2025-03-12T15:53:10.261037Z 0 [Note] Skipping generation of RSA key pair as key files are present in data directory.
+2025-03-12T15:53:10.264562Z 0 [Warning] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+2025-03-12T15:53:10.270140Z 0 [Note] Event Scheduler: Loaded 0 events
+2025-03-12T15:53:10.271162Z 0 [Note] mysqld: ready for connections.
+Version: '5.7.44'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server (GPL)
+2025-03-12 15:53:10+00:00 [Note] [Entrypoint]: Temporary server started.
+'/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+2025-03-12T15:53:10.809688Z 3 [Note] InnoDB: Stopping purge
+2025-03-12T15:53:10.835135Z 3 [Note] InnoDB: Resuming purge
+2025-03-12T15:53:10.840536Z 3 [Note] InnoDB: Stopping purge
+2025-03-12T15:53:10.849524Z 3 [Note] InnoDB: Resuming purge
+2025-03-12T15:53:10.852465Z 3 [Note] InnoDB: Stopping purge
+2025-03-12T15:53:10.862641Z 3 [Note] InnoDB: Resuming purge
+2025-03-12T15:53:10.865239Z 3 [Note] InnoDB: Stopping purge
+2025-03-12T15:53:10.870538Z 3 [Note] InnoDB: Resuming purge
+Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+2025-03-12 15:53:13+00:00 [Note] [Entrypoint]: Creating database tempSchema
+
+2025-03-12 15:53:13+00:00 [Note] [Entrypoint]: Stopping temporary server
+2025-03-12T15:53:13.963117Z 0 [Note] Giving 0 client threads a chance to die gracefully
+2025-03-12T15:53:13.963180Z 0 [Note] Shutting down slave threads
+2025-03-12T15:53:13.963185Z 0 [Note] Forcefully disconnecting 0 remaining clients
+2025-03-12T15:53:13.972401Z 0 [Note] Event Scheduler: Purging the queue. 0 events
+2025-03-12T15:53:13.973384Z 0 [Note] Binlog end
+2025-03-12T15:53:13.974790Z 0 [Note] Shutting down plugin 'ngram'
+2025-03-12T15:53:13.974859Z 0 [Note] Shutting down plugin 'partition'
+2025-03-12T15:53:13.974865Z 0 [Note] Shutting down plugin 'BLACKHOLE'
+2025-03-12T15:53:13.974868Z 0 [Note] Shutting down plugin 'ARCHIVE'
+2025-03-12T15:53:13.974869Z 0 [Note] Shutting down plugin 'PERFORMANCE_SCHEMA'
+2025-03-12T15:53:13.974889Z 0 [Note] Shutting down plugin 'MRG_MYISAM'
+2025-03-12T15:53:13.974892Z 0 [Note] Shutting down plugin 'MyISAM'
+2025-03-12T15:53:13.974998Z 0 [Note] Shutting down plugin 'INNODB_SYS_VIRTUAL'
+2025-03-12T15:53:13.975041Z 0 [Note] Shutting down plugin 'INNODB_SYS_DATAFILES'
+2025-03-12T15:53:13.975044Z 0 [Note] Shutting down plugin 'INNODB_SYS_TABLESPACES'
+2025-03-12T15:53:13.975045Z 0 [Note] Shutting down plugin 'INNODB_SYS_FOREIGN_COLS'
+2025-03-12T15:53:13.975046Z 0 [Note] Shutting down plugin 'INNODB_SYS_FOREIGN'
+2025-03-12T15:53:13.975047Z 0 [Note] Shutting down plugin 'INNODB_SYS_FIELDS'
+2025-03-12T15:53:13.975048Z 0 [Note] Shutting down plugin 'INNODB_SYS_COLUMNS'
+2025-03-12T15:53:13.975049Z 0 [Note] Shutting down plugin 'INNODB_SYS_INDEXES'
+2025-03-12T15:53:13.975049Z 0 [Note] Shutting down plugin 'INNODB_SYS_TABLESTATS'
+2025-03-12T15:53:13.975050Z 0 [Note] Shutting down plugin 'INNODB_SYS_TABLES'
+2025-03-12T15:53:13.975052Z 0 [Note] Shutting down plugin 'INNODB_FT_INDEX_TABLE'
+2025-03-12T15:53:13.975052Z 0 [Note] Shutting down plugin 'INNODB_FT_INDEX_CACHE'
+2025-03-12T15:53:13.975053Z 0 [Note] Shutting down plugin 'INNODB_FT_CONFIG'
+2025-03-12T15:53:13.975054Z 0 [Note] Shutting down plugin 'INNODB_FT_BEING_DELETED'
+2025-03-12T15:53:13.975055Z 0 [Note] Shutting down plugin 'INNODB_FT_DELETED'
+2025-03-12T15:53:13.975056Z 0 [Note] Shutting down plugin 'INNODB_FT_DEFAULT_STOPWORD'
+2025-03-12T15:53:13.975057Z 0 [Note] Shutting down plugin 'INNODB_METRICS'
+2025-03-12T15:53:13.975058Z 0 [Note] Shutting down plugin 'INNODB_TEMP_TABLE_INFO'
+2025-03-12T15:53:13.975059Z 0 [Note] Shutting down plugin 'INNODB_BUFFER_POOL_STATS'
+2025-03-12T15:53:13.975060Z 0 [Note] Shutting down plugin 'INNODB_BUFFER_PAGE_LRU'
+2025-03-12T15:53:13.975060Z 0 [Note] Shutting down plugin 'INNODB_BUFFER_PAGE'
+2025-03-12T15:53:13.975061Z 0 [Note] Shutting down plugin 'INNODB_CMP_PER_INDEX_RESET'
+2025-03-12T15:53:13.975062Z 0 [Note] Shutting down plugin 'INNODB_CMP_PER_INDEX'
+2025-03-12T15:53:13.975063Z 0 [Note] Shutting down plugin 'INNODB_CMPMEM_RESET'
+2025-03-12T15:53:13.975064Z 0 [Note] Shutting down plugin 'INNODB_CMPMEM'
+2025-03-12T15:53:13.975065Z 0 [Note] Shutting down plugin 'INNODB_CMP_RESET'
+2025-03-12T15:53:13.975066Z 0 [Note] Shutting down plugin 'INNODB_CMP'
+2025-03-12T15:53:13.975067Z 0 [Note] Shutting down plugin 'INNODB_LOCK_WAITS'
+2025-03-12T15:53:13.975068Z 0 [Note] Shutting down plugin 'INNODB_LOCKS'
+2025-03-12T15:53:13.975069Z 0 [Note] Shutting down plugin 'INNODB_TRX'
+2025-03-12T15:53:13.975070Z 0 [Note] Shutting down plugin 'InnoDB'
+2025-03-12T15:53:13.977960Z 0 [Note] InnoDB: FTS optimize thread exiting.
+2025-03-12T15:53:14.075282Z 0 [Note] InnoDB: Starting shutdown...
+2025-03-12T15:53:14.202156Z 0 [Note] InnoDB: Dumping buffer pool(s) to /var/lib/mysql/ib_buffer_pool
+2025-03-12T15:53:14.202419Z 0 [Note] InnoDB: Buffer pool(s) dump completed at 250312 15:53:14
+2025-03-12T15:53:15.832382Z 0 [Note] InnoDB: Shutdown completed; log sequence number 12219419
+2025-03-12T15:53:15.834478Z 0 [Note] InnoDB: Removed temporary tablespace data file: "ibtmp1"
+2025-03-12T15:53:15.834662Z 0 [Note] Shutting down plugin 'MEMORY'
+2025-03-12T15:53:15.834669Z 0 [Note] Shutting down plugin 'CSV'
+2025-03-12T15:53:15.834673Z 0 [Note] Shutting down plugin 'sha256_password'
+2025-03-12T15:53:15.834675Z 0 [Note] Shutting down plugin 'mysql_native_password'
+2025-03-12T15:53:15.834893Z 0 [Note] Shutting down plugin 'binlog'
+2025-03-12T15:53:15.835964Z 0 [Note] mysqld: Shutdown complete
+
+2025-03-12 15:53:15+00:00 [Note] [Entrypoint]: Temporary server stopped
+
+2025-03-12 15:53:15+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+
+2025-03-12T15:53:16.117043Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
+2025-03-12T15:53:16.118560Z 0 [Note] mysqld (mysqld 5.7.44) starting as process 1 ...
+2025-03-12T15:53:16.124010Z 0 [Note] InnoDB: PUNCH HOLE support available
+2025-03-12T15:53:16.124353Z 0 [Note] InnoDB: Mutexes and rw_locks use GCC atomic builtins
+2025-03-12T15:53:16.124366Z 0 [Note] InnoDB: Uses event mutexes
+2025-03-12T15:53:16.124368Z 0 [Note] InnoDB: GCC builtin __atomic_thread_fence() is used for memory barrier
+2025-03-12T15:53:16.124369Z 0 [Note] InnoDB: Compressed tables use zlib 1.2.13
+2025-03-12T15:53:16.124371Z 0 [Note] InnoDB: Using Linux native AIO
+2025-03-12T15:53:16.125005Z 0 [Note] InnoDB: Number of pools: 1
+2025-03-12T15:53:16.125473Z 0 [Note] InnoDB: Using CPU crc32 instructions
+2025-03-12T15:53:16.128624Z 0 [Note] InnoDB: Initializing buffer pool, total size = 128M, instances = 1, chunk size = 128M
+2025-03-12T15:53:16.136885Z 0 [Note] InnoDB: Completed initialization of buffer pool
+2025-03-12T15:53:16.139390Z 0 [Note] InnoDB: If the mysqld execution user is authorized, page cleaner thread priority can be changed. See the man page of setpriority().
+2025-03-12T15:53:16.153392Z 0 [Note] InnoDB: Highest supported file format is Barracuda.
+2025-03-12T15:53:16.176072Z 0 [Note] InnoDB: Creating shared tablespace for temporary tables
+2025-03-12T15:53:16.176459Z 0 [Note] InnoDB: Setting file './ibtmp1' size to 12 MB. Physically writing the file full; Please wait ...
+2025-03-12T15:53:16.199766Z 0 [Note] InnoDB: File './ibtmp1' size is now 12 MB.
+2025-03-12T15:53:16.202132Z 0 [Note] InnoDB: 96 redo rollback segment(s) found. 96 redo rollback segment(s) are active.
+2025-03-12T15:53:16.202968Z 0 [Note] InnoDB: 32 non-redo rollback segment(s) are active.
+2025-03-12T15:53:16.204056Z 0 [Note] InnoDB: 5.7.44 started; log sequence number 12219419
+2025-03-12T15:53:16.204780Z 0 [Note] InnoDB: Loading buffer pool(s) from /var/lib/mysql/ib_buffer_pool
+2025-03-12T15:53:16.205119Z 0 [Note] Plugin 'FEDERATED' is disabled.
+2025-03-12T15:53:16.206696Z 0 [Note] InnoDB: Buffer pool(s) load completed at 250312 15:53:16
+2025-03-12T15:53:16.209874Z 0 [Note] Found ca.pem, server-cert.pem and server-key.pem in data directory. Trying to enable SSL support using them.
+2025-03-12T15:53:16.209930Z 0 [Note] Skipping generation of SSL certificates as certificate files are present in data directory.
+2025-03-12T15:53:16.209935Z 0 [Warning] A deprecated TLS version TLSv1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:16.209936Z 0 [Warning] A deprecated TLS version TLSv1.1 is enabled. Please use TLSv1.2 or higher.
+2025-03-12T15:53:16.210490Z 0 [Warning] CA certificate ca.pem is self signed.
+2025-03-12T15:53:16.210761Z 0 [Note] Skipping generation of RSA key pair as key files are present in data directory.
+2025-03-12T15:53:16.211147Z 0 [Note] Server hostname (bind-address): '*'; port: 3306
+2025-03-12T15:53:16.211224Z 0 [Note] IPv6 is available.
+2025-03-12T15:53:16.211234Z 0 [Note]   - '::' resolves to '::';
+2025-03-12T15:53:16.211245Z 0 [Note] Server socket created on IP: '::'.
+2025-03-12T15:53:16.213944Z 0 [Warning] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+2025-03-12T15:53:16.220918Z 0 [Note] Event Scheduler: Loaded 0 events
+2025-03-12T15:53:16.221375Z 0 [Note] mysqld: ready for connections.
+Version: '5.7.44'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server (GPL)
+2025-03-12T15:54:25.032110Z 0 [Note] InnoDB: page_cleaner: 1000ms intended loop took 30648ms. The settings might not be optimal. (flushed=0 and evicted=0, during the time.)
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get pods -n dev                   
+NAME                                          READY   STATUS    RESTARTS   AGE
+mysql-577c45786b-d2s4k                        1/1     Running   0          2m54s
+springboot-crud-deployment-758fb9bb68-8vvlh   1/1     Running   0          2m45s
+springboot-crud-deployment-758fb9bb68-xh8j5   1/1     Running   0          2m45s
+springboot-crud-deployment-758fb9bb68-z9m68   1/1     Running   0          2m46s
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl logs springboot-crud-deployment-758fb9bb68-xh8j5 -n dev
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.1)
+
+2025-03-12T15:53:27.684Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : Starting SbCrudK8sSampleApplication v0.0.1-SNAPSHOT using Java 21.0.5 with PID 1 (/app/app.jar started by root in /app)
+2025-03-12T15:53:27.687Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : No active profile set, falling back to 1 default profile: "default"
+2025-03-12T15:53:30.714Z  INFO 1 --- [sb-crud-k8s-sample] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-03-12T15:53:30.818Z  INFO 1 --- [sb-crud-k8s-sample] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 90 ms. Found 1 JPA repository interface.
+2025-03-12T15:53:32.968Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-03-12T15:53:33.000Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-03-12T15:53:33.001Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.34]
+2025-03-12T15:53:33.140Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-03-12T15:53:33.141Z  INFO 1 --- [sb-crud-k8s-sample] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 5271 ms
+2025-03-12T15:53:34.029Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-03-12T15:53:34.193Z  INFO 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.4.Final
+2025-03-12T15:53:34.258Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-03-12T15:53:35.192Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-03-12T15:53:35.248Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-03-12T15:53:35.763Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5eeee124
+2025-03-12T15:53:35.775Z  INFO 1 --- [sb-crud-k8s-sample] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-03-12T15:53:35.861Z  WARN 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2025-03-12T15:53:35.878Z  WARN 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-03-12T15:53:35.916Z  INFO 1 --- [sb-crud-k8s-sample] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+        Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+        Database driver: undefined/unknown
+        Database version: 5.7.44
+        Autocommit mode: undefined/unknown
+        Isolation level: undefined/unknown
+        Minimum pool size: undefined/unknown
+        Maximum pool size: undefined/unknown
+2025-03-12T15:53:38.236Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-03-12T15:53:38.309Z  INFO 1 --- [sb-crud-k8s-sample] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-03-12T15:53:38.849Z  WARN 1 --- [sb-crud-k8s-sample] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-03-12T15:53:40.023Z  INFO 1 --- [sb-crud-k8s-sample] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-03-12T15:53:40.066Z  INFO 1 --- [sb-crud-k8s-sample] [           main] c.e.demo.SbCrudK8sSampleApplication      : Started SbCrudK8sSampleApplication in 13.622 seconds (process running for 14.833)
+2025-03-12T15:54:25.074Z  WARN 1 --- [sb-crud-k8s-sample] [l-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=49s198ms420µs455ns).
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ kubectl get services -n dev                                    
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+mysql                 ClusterIP   None             <none>        3306/TCP         3m23s
+springboot-crud-svc   NodePort    10.110.131.177   <none>        8080:32751/TCP   3m15s
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ minikube service springboot-crud-svc --url -n dev
+http://192.168.49.2:32751
+                                                                                                                                           
+┌──(ashu㉿kali)-[~/…/k8s/practise/sb-crud/with-CM-and-secrets]
+└─$ 
+
+
+delete the resources post task

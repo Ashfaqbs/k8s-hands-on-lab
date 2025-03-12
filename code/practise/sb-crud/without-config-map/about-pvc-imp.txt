@@ -1,0 +1,61 @@
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get pvc 
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+mysql-pv-claim   Bound    pvc-f4e4ec6a-bc00-4d34-869d-2a35952c61eb   1Gi        RWO            standard       <unset>                 6h42m
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete pvc mysql-pv-claim                    
+persistentvolumeclaim "mysql-pv-claim" deleted
+
+
+
+when the use case or the task is done, we usually for cleanup
+remove resources like deployment, service but in this case where we have a DB which use a 
+volume ie PVC we have to remove PVC objects as well, else the data will be there until removed in db
+and if the PVC is accidenlty or used the same PVC if the PVC was  not removed we can see the old data in DB and finally in app.
+
+
+Remove all the objects post usage.
+
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get deployments
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+mysql                        1/1     1            1           9m51s
+springboot-crud-deployment   3/3     3            3           5m53s
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete deployment springboot-crud-deployment 
+deployment.apps "springboot-crud-deployment" deleted
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete deployment mysql                     
+deployment.apps "mysql" deleted
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl  get services          
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1        <none>        443/TCP          18d
+mysql                 ClusterIP   None             <none>        3306/TCP         19m
+springboot-crud-svc   NodePort    10.110.249.226   <none>        8080:30202/TCP   15m
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete services mysql springboot-crud-svc
+service "mysql" deleted
+service "springboot-crud-svc" deleted
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ 
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl get pvc 
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+mysql-pv-claim   Bound    pvc-f4e4ec6a-bc00-4d34-869d-2a35952c61eb   1Gi        RWO            standard       <unset>                 6h42m
+                                                                                                                                                                                                                                            
+┌──(ashu㉿kali)-[~/Desktop/code/k8s/practise]
+└─$ kubectl delete pvc mysql-pv-claim                    
+persistentvolumeclaim "mysql-pv-claim" deleted
+
+
+
+
