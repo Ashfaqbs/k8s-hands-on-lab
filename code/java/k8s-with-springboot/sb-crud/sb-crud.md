@@ -185,6 +185,9 @@ mysql-bd958bf58-94qd6   1/1     Running   0          17m
 C:\Users\ashfa\OneDrive\Desktop\My-Learning\Java\Code\SB-k8s\springboot-crud-k8s>kubectl exec -it mysql-bd958bf58-94qd6 /bin/bash
 kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
 
+eg : kubectl exec -it mysql-bd958bf58-94qd6 -- /bin/bash
+
+
 bash-4.2# mysql -h mysql -u root -p
 Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
