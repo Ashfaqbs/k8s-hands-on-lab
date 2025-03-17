@@ -1,0 +1,147 @@
+ use the same manifest files and apply it 
+
+
+
+
+
+
+ ──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl apply -f springboot-apis.yaml
+deployment.apps/api1-deployment created
+service/api1-service created
+deployment.apps/api2-deployment created
+service/api2-service created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl get pods,services,deployments  -n default
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/api1-deployment-56985b4fd7-lzt7p   1/1     Running   0          25s
+pod/api2-deployment-75c7bd77d8-hmf8k   1/1     Running   0          25s
+
+NAME                   TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+service/api1-service   ClusterIP   10.111.157.121   <none>        80/TCP    25s
+service/api2-service   ClusterIP   10.99.33.206     <none>        80/TCP    25s
+service/kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP   2d8h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api1-deployment   1/1     1            1           25s
+deployment.apps/api2-deployment   1/1     1            1           25s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ 
+
+
+
+- apply the host baed ingress yaml 
+
+
+and remove the ip and host configured for earlier project i.e route based and update the host based which is confgured in current ingress yaml file 
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ minikube ip
+192.168.49.2
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ cat /etc/hosts             
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+192.168.49.2  springboot.local
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ nano /etc/hosts              
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ sudo nano /etc/hosts
+[sudo] password for ashfaq: 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ cat /etc/hosts 
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+192.168.49.2 api1.springboot.local
+192.168.49.2 api2.springboot.local
+
+
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ 
+
+
+- test out the apis 
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ curl http://api1.springboot.local/helloworld
+curl http://api2.springboot.local/helloworld
+helloworldhelloworld                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ 
+
+
+- delete the resources
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl get pods,services,ingress,deployments 
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/api1-deployment-56985b4fd7-lzt7p   1/1     Running   0          13m
+pod/api2-deployment-75c7bd77d8-hmf8k   1/1     Running   0          13m
+
+NAME                   TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+service/api1-service   ClusterIP   10.111.157.121   <none>        80/TCP    13m
+service/api2-service   ClusterIP   10.99.33.206     <none>        80/TCP    13m
+service/kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP   2d8h
+
+NAME                                                CLASS   HOSTS                                         ADDRESS        PORTS   AGE
+ingress.networking.k8s.io/springboot-host-ingress   nginx   api1.springboot.local,api2.springboot.local   192.168.49.2   80      9m51s
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api1-deployment   1/1     1            1           13m
+deployment.apps/api2-deployment   1/1     1            1           13m
+
+
+
+
+kubectl delete pod api1-deployment-56985b4fd7-lzt7p api2-deployment-75c7bd77d8-hmf8k
+kubectl delete service api1-service api2-service
+kubectl delete deployment api1-deployment api2-deployment
+kubectl delete ingress springboot-host-ingress
+
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl delete pod api1-deployment-56985b4fd7-lzt7p api2-deployment-75c7bd77d8-hmf8k
+kubectl delete service api1-service api2-service
+kubectl delete deployment api1-deployment api2-deployment
+pod "api1-deployment-56985b4fd7-lzt7p" deleted
+pod "api2-deployment-75c7bd77d8-hmf8k" deleted
+service "api1-service" deleted
+service "api2-service" deleted
+deployment.apps "api1-deployment" deleted
+deployment.apps "api2-deployment" deleted
+
+
+──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl get ingress -n default
+NAME                      CLASS   HOSTS                                         ADDRESS        PORTS   AGE
+springboot-host-ingress   nginx   api1.springboot.local,api2.springboot.local   192.168.49.2   80      11m
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl delete ingress springboot-host-ingress                                    
+ingress.networking.k8s.io "springboot-host-ingress" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ 

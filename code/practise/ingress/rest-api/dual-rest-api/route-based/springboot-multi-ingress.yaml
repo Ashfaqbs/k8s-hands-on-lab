@@ -1,0 +1,133 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: springboot-multi-ingress
+#   namespace: default
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - host: "springboot.local"
+#     http:
+#       paths:
+#       - path: /api1
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: api1-service
+#             port:
+#               number: 80
+#       - path: /api2
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: api2-service
+#             port:
+#               number: 80
+
+# Error
+#What’s Happening
+# Your Setup: 
+# Ingress routes /api1 to api1-service:80 → pod’s 8080.
+
+# You’re calling http://springboot.local/api1/helloworld.
+
+# Error: 404 Not Found with path: "/api1/helloworld".
+
+# Clue: You said your API works at localhost:8080/helloworld locally, but now it’s failing with /api1/helloworld.
+
+# Why the 404?
+# Spring Boot Endpoint: Your app (darksharkash/simplerestapisb-k8s) has an endpoint at /helloworld, not /api1/helloworld. When NGINX forwards the full path (/api1/helloworld) to the pod, Spring Boot doesn’t have a controller mapped to that—it’s expecting just /helloworld.
+
+# Ingress Path Behavior: By default, NGINX passes the entire request path (including /api1) to the backend (your pod). Since your app doesn’t know /api1/helloworld, it 404s.
+
+
+
+
+# working but with warninigs
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: springboot-multi-ingress
+#   namespace: default
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /$2  # Strips prefix, captures rest
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#   - host: "springboot.local"
+#     http:
+#       paths:
+#       - path: /api1(/|$)(.*)  # Matches /api1 or /api1/anything
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: api1-service
+#             port:
+#               number: 80
+#       - path: /api2(/|$)(.*)  # Matches /api2 or /api2/anything
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: api2-service
+#             port:
+#               number: 80
+
+
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ kubectl apply -f springboot-multi-ingress.yaml     
+# Warning: path /api1(/|$)(.*) cannot be used with pathType Prefix
+# Warning: path /api2(/|$)(.*) cannot be used with pathType Prefix
+# ingress.networking.k8s.io/springboot-multi-ingress configured
+                                                                                                                                                                                 
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ 
+
+
+
+
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-multi-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "springboot.local"
+    http:
+      paths:
+      - path: /api1(/|$)(.*)
+        pathType: ImplementationSpecific  # Changed from Prefix
+        backend:
+          service:
+            name: api1-service
+            port:
+              number: 80
+      - path: /api2(/|$)(.*)
+        pathType: ImplementationSpecific  # Changed from Prefix
+        backend:
+          service:
+            name: api2-service
+            port:
+              number: 80
+              
+# update the host and minikube ip in /etc/hosts
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ minikube ip  
+# 192.168.49.2
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ cat /etc/hosts             
+# 127.0.0.1       localhost
+# 127.0.1.1       kali-vm.kali.lab        kali-vm
+# 192.168.49.2  springboot.local
+# # The following lines are desirable for IPv6 capable hosts
+# ::1     localhost ip6-localhost ip6-loopback
+# ff02::1 ip6-allnodes
+# ff02::2 ip6-allrouters
+                                                                                                                                                                                 

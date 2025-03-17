@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-api
+  namespace: default
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: springboot-api
+  template:
+    metadata:
+      labels:
+        app: springboot-api
+    spec:
+      containers:
+      - name: springboot-api
+        image: darksharkash/simplerestapisb-k8s
+        ports:
+        - containerPort: 8080  # Default Spring Boot port, adjust if your app uses a different one
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-api-service
+  namespace: default
+spec:
+  selector:
+    app: springboot-api
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP  # Default type, exposes the service only within the cluster

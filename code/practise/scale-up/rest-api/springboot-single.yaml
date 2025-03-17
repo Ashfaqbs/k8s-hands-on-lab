@@ -1,0 +1,41 @@
+# Deployment Definition
+apiVersion: apps/v1  # The API version for the Deployment resource
+kind: Deployment  # This specifies that we're defining a Deployment resource
+metadata:
+  name: springboot-deployment  # Name of the Deployment
+  namespace: default  # The Kubernetes namespace where the Deployment will be created
+spec:
+  replicas: 1  # Number of pod replicas to create (1 pod for simplicity) # Start with 1, HPA will adjust
+  selector:
+    matchLabels:
+      app: springboot  # Match pods with the label 'app=springboot' to manage them
+  template:  # The template for the pod that will be created
+    metadata:
+      labels:
+        app: springboot  # Label for the pod to identify it
+    spec:
+      containers:  # List of containers in the pod
+      - name: springboot-api  # Name of the container
+        image: darksharkash/simplerestapisb-k8s  # Docker image for the container
+        ports:
+        - containerPort: 8080  # Port the container will listen to
+        resources:
+          requests:
+            cpu: "100m"  # CPU request: The container will get at least 0.1 CPU core
+          limits:
+            cpu: "200m"  # CPU limit: The container will be capped at 0.2 CPU core
+
+# Service Definition (unchanged)
+---
+apiVersion: v1  # The API version for the Service resource
+kind: Service  # This specifies that we're defining a Service resource
+metadata:
+  name: springboot-service  # Name of the Service
+  namespace: default  # The namespace where the Service will be created
+spec:
+  selector:
+    app: springboot  # Select pods with the label 'app=springboot' to route traffic to
+  ports:
+    - port: 80  # The port on which the service will be exposed inside the cluster
+      targetPort: 8080  # The port on the container that the service will route traffic to
+  type: ClusterIP  # This type of service exposes the service only within the cluster (default option)

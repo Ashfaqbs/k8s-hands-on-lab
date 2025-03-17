@@ -1,0 +1,36 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: springboot-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: springboot-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 50
+
+
+
+# scaleTargetRef: Targets springboot-deployment.
+
+# minReplicas: 1: At least 1 pod.
+
+# maxReplicas: 5: Caps at 5 pods.
+
+# targetCPUUtilizationPercentage: 50: Scales up if CPU hits 50% of 200m (100m usage).
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+# └─$ kubectl apply -f springboot-hpa.yaml
+# horizontalpodautoscaler.autoscaling/springboot-hpa created
+
+
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+# └─$ kubectl get hpa -n default
+# NAME             REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+# springboot-hpa   Deployment/springboot-deployment   cpu: 3%/50%   1         5         1          46s
+
+

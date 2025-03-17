@@ -1,0 +1,364 @@
+- in K8s we have pods at upfront as per defined in replica in deployment yaml file and we can have an autoscale option as well that is called Horizontal Pod Autoscaling (HPA) in Kubernetes.
+
+auto-scaling where the pod count adjusts automatically as traffic spikes or drops. That’s Horizontal Pod Autoscaling (HPA) in Kubernetes,
+
+
+to work with HPA we need metric server enable and verify it 
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ minikube addons enable metrics-server
+💡  metrics-server is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+    ▪ Using image registry.k8s.io/metrics-server/metrics-server:v0.7.2
+🌟  The 'metrics-server' addon is enabled
+                                                                                                                                                                                                
+
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get pods -n kube-system -l k8s-app=metrics-server
+NAME                              READY   STATUS    RESTARTS   AGE
+metrics-server-7fbb699795-m9q4w   0/1     Running   0          31s
+                                                                                                                                                                                                
+
+
+- configure the code yaml 
+
+# Deployment Definition
+apiVersion: apps/v1  # The API version for the Deployment resource
+kind: Deployment  # This specifies that we're defining a Deployment resource
+metadata:
+  name: springboot-deployment  # Name of the Deployment
+  namespace: default  # The Kubernetes namespace where the Deployment will be created
+spec:
+  replicas: 1  # Number of pod replicas to create (1 pod for simplicity) # Start with 1, HPA will adjust
+  selector:
+    matchLabels:
+      app: springboot  # Match pods with the label 'app=springboot' to manage them
+  template:  # The template for the pod that will be created
+    metadata:
+      labels:
+        app: springboot  # Label for the pod to identify it
+    spec:
+      containers:  # List of containers in the pod
+      - name: springboot-api  # Name of the container
+        image: darksharkash/simplerestapisb-k8s  # Docker image for the container
+        ports:
+        - containerPort: 8080  # Port the container will listen to
+        resources:
+          requests:
+            cpu: "100m"  # CPU request: The container will get at least 0.1 CPU core
+          limits:
+            cpu: "200m"  # CPU limit: The container will be capped at 0.2 CPU core
+
+# Service Definition (unchanged)
+---
+apiVersion: v1  # The API version for the Service resource
+kind: Service  # This specifies that we're defining a Service resource
+metadata:
+  name: springboot-service  # Name of the Service
+  namespace: default  # The namespace where the Service will be created
+spec:
+  selector:
+    app: springboot  # Select pods with the label 'app=springboot' to route traffic to
+  ports:
+    - port: 80  # The port on which the service will be exposed inside the cluster
+      targetPort: 8080  # The port on the container that the service will route traffic to
+  type: ClusterIP  # This type of service exposes the service only within the cluster (default option)
+
+
+
+and we will use the cacerts file with updated in secrets same flow on we did with https-rest-api project
+
+- apply the code yaml kubectl apply -f springboot-single.yaml
+
+
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl apply -f springboot-single.yaml
+deployment.apps/springboot-deployment created
+service/springboot-service created
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ 
+
+
+- apply the secrets and ingress file (same used for https-rest-api project)
+- update the /etc/hosts with ip and hostname defined in ingress 
+
+Call the api and verify
+- working 
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl apply -f springboot-tls-secret.yaml                              
+secret/springboot-tls created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl apply -f  springboot-https-ingress.yaml 
+ingress.networking.k8s.io/springboot-https-ingress created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ cat /etc/hosts
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+
+#192.168.49.2 springboot.local
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ sudo vim /etc/hosts
+[sudo] password for ashfaq: 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ cat /etc/hosts     
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+
+192.168.49.2 springboot.local
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ 
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ curl --insecure https://springboot.local/helloworld 
+helloworld                                                                                                                                                                                 
+
+
+
+- create the hpa yaml for our code 
+ and there map the deployment to our code deployment name
+
+
+ apply the file 
+
+ ┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl apply -f springboot-hpa.yaml
+horizontalpodautoscaler.autoscaling/springboot-hpa created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get hpa -n default
+NAME             REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+springboot-hpa   Deployment/springboot-deployment   cpu: 3%/50%   1         5         1          46s
+
+
+- now we need to test out the file load testing using an api testing cli tool called hey
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ sudo apt update && sudo apt install hey
+Hit:1 https://packages.microsoft.com/repos/code stable InRelease
+Hit:2 http://http.kali.org/kali kali-rolling InRelease               
+Ign:3 https://apt.releases.hashicorp.com kali-rolling InRelease
+Err:4 https://apt.releases.hashicorp.com kali-rolling Release
+  404  Not Found [IP: 18.155.99.75 443]
+Error: The repository 'https://apt.releases.hashicorp.com kali-rolling Release' does not have a Release file.
+Notice: Updating from such a repository can't be done securely, and is therefore disabled by default.
+Notice: See apt-secure(8) manpage for repository creation and user configuration details.
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ ls
+cert.pem  key.pem  rough.txt  springboot-hpa.yaml  springboot-https-ingress.yaml  springboot-single.yaml  springboot-tls-secret.yaml
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ hey -n 10000 -c 10 -m GET https://springboot.local/helloworld --insecure
+Command 'hey' not found, but can be installed with:
+sudo apt install hey
+Do you want to install it? (N/y)y
+sudo apt install hey
+The following packages were automatically installed and are no longer required:
+  fonts-liberation2 libboost-iostreams1.83.0 libgdal34t64 libgfxdr0        libhdf5-hl-100t64 libpoppler134     librdmacm1t64   python3.11         samba-vfs-modules
+  ibverbs-providers libboost-thread1.83.0    libgfapi0    libglusterfs0    libibverbs1       libpython3.11-dev libsuperlu6     python3.11-dev
+  libarmadillo12    libcephfs2               libgfrpc0    libhdf5-103-1t64 libnetcdf19t64    librados2         python3-lib2to3 python3.11-minimal
+Use 'sudo apt autoremove' to remove them.
+
+Installing:
+  hey
+
+Summary:
+  Upgrading: 0, Installing: 1, Removing: 0, Not Upgrading: 2126
+  Download size: 2482 kB
+  Space needed: 8022 kB / 4876 MB available
+
+Get:1 http://http.kali.org/kali kali-rolling/main amd64 hey amd64 0.1.4+ds-1+b4 [2482 kB]
+Fetched 2482 kB in 4s (697 kB/s)
+Selecting previously unselected package hey.
+(Reading database ... 441114 files and directories currently installed.)
+Preparing to unpack .../hey_0.1.4+ds-1+b4_amd64.deb ...
+Unpacking hey (0.1.4+ds-1+b4) ...
+Setting up hey (0.1.4+ds-1+b4) ...
+Processing triggers for man-db (2.12.1-1) ...
+Processing triggers for kali-menu (2023.4.7) ...
+Scanning processes...                                                                                                                                                            
+Scanning linux images...                                                                                                                                                         
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ hey -n 10000 -c 10 -m GET https://springboot.local/helloworld --insecure
+
+                        
+Summary:
+  Total:        56.4085 secs
+  Slowest:      0.8265 secs
+  Fastest:      0.0003 secs
+  Average:      0.0559 secs
+  Requests/sec: 177.2782
+  
+  Total data:   102240 bytes
+  Size/request: 10 bytes
+
+Response time histogram:
+  0.000 [1]     |
+  0.083 [6920]  |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+  0.166 [2474]  |■■■■■■■■■■■■■■
+  0.248 [412]   |■■
+  0.331 [107]   |■
+  0.413 [32]    |
+  0.496 [25]    |
+  0.579 [5]     |
+  0.661 [12]    |
+  0.744 [6]     |
+  0.826 [6]     |
+
+
+Latency distribution:
+  10% in 0.0025 secs
+  25% in 0.0049 secs
+  50% in 0.0257 secs
+  75% in 0.0912 secs
+  90% in 0.1041 secs
+  95% in 0.1793 secs
+  99% in 0.3038 secs
+
+Details (average, fastest, slowest):
+  DNS+dialup:   0.0000 secs, 0.0003 secs, 0.8265 secs
+  DNS-lookup:   0.0000 secs, 0.0000 secs, 0.0048 secs
+  req write:    0.0000 secs, 0.0000 secs, 0.0122 secs
+  resp wait:    0.0557 secs, 0.0003 secs, 0.8264 secs
+  resp read:    0.0001 secs, -0.0001 secs, 0.0196 secs
+
+Status code distribution:
+  [200] 9984 responses
+  [502] 16 responses
+
+
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ 
+                                                          
+
+ 
+- Watching the events 
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ kubectl get hpa -n default --watch
+NAME             REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         1          8m31s
+springboot-hpa   Deployment/springboot-deployment   cpu: 125%/50%   1         5         1          8m31s
+springboot-hpa   Deployment/springboot-deployment   cpu: 125%/50%   1         5         3          8m47s
+springboot-hpa   Deployment/springboot-deployment   cpu: 64%/50%    1         5         3          9m32s
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%     1         5         3          10m
+^C                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ kubectl get hpa -n default --watch
+NAME             REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         3          13m
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         3          13m
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         3          15m
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         1          15m
+^C                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ kubectl get hpa -n default --watch
+NAME             REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         1          15m
+
+- we can see its scaling down
+
+
+- clear the resource
+
+──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get all
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/springboot-deployment-7df5848dc5-4jmd9   1/1     Running   0          21m
+
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes           ClusterIP   10.96.0.1      <none>        443/TCP   2d15h
+service/springboot-service   ClusterIP   10.105.62.36   <none>        80/TCP    21m
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/springboot-deployment   1/1     1            1           21m
+
+NAME                                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/springboot-deployment-7df5848dc5   1         1         1       21m
+
+NAME                                                 REFERENCE                          TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/springboot-hpa   Deployment/springboot-deployment   cpu: 2%/50%   1         5         1          18m
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl delete  deployment springboot-deployment            
+deployment.apps "springboot-deployment" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl delete service springboot-service                      
+service "springboot-service" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl delete  horizontalpodautoscaler.autoscaling/springboot-hpa                     
+horizontalpodautoscaler.autoscaling "springboot-hpa" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get ingress  -n default                                     
+NAME                       CLASS   HOSTS              ADDRESS        PORTS     AGE
+springboot-https-ingress   nginx   springboot.local   192.168.49.2   80, 443   18m
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl delete  ingress  springboot-https-ingress  -n default  
+ingress.networking.k8s.io "springboot-https-ingress" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get all                                              
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   2d15h
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl get secrets
+NAME             TYPE                DATA   AGE
+springboot-tls   kubernetes.io/tls   2      19m
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ kubectl delete  secrets springboot-tls
+secret "springboot-tls" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/scale-up/rest-api]
+└─$ 
+

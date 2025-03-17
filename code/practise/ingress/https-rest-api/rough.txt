@@ -1,0 +1,241 @@
+- create the code yaml  apply the file
+kubectl apply -f springboot-single.yaml
+- create custom cacerts 
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=springboot.local"
+
+- Add in secrets via command cli , or manifest file (take the content and use base64 and paste the content )
+cat cert.pem | base64 | tr -d '\n' -> gives the content 
+cat key.pem | base64 | tr -d '\n'
+
+
+apply the secret file  
+kubectl apply -f springboot-https-ingress.yaml
+
+create the ingress mention the host, tls provide the secret name etc..
+update the host and minikube ip in /etc/host and 
+
+
+test the url
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ curl --insecure https://springboot.local/helloworld
+helloworld                                                                                                                                                                                 
+
+
+https://springboot.local/helloworld
+helloworld                                                                                                                                                                                 
+
+
+- all commands 
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-single.yaml
+deployment.apps/springboot-deployment created
+service/springboot-service created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get pods,services -n default
+NAME                                         READY   STATUS              RESTARTS   AGE
+pod/springboot-deployment-559fb6b769-dzgjb   0/1     ContainerCreating   0          5s
+
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes           ClusterIP   10.96.0.1      <none>        443/TCP   2d14h
+service/springboot-service   ClusterIP   10.100.28.15   <none>        80/TCP    5s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get pods,services -n default
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/springboot-deployment-559fb6b769-dzgjb   1/1     Running   0          11s
+
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes           ClusterIP   10.96.0.1      <none>        443/TCP   2d14h
+service/springboot-service   ClusterIP   10.100.28.15   <none>        80/TCP    11s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=springboot.local"
+...+.+.....+++++++++++++++++++++++++++++++++++++++*.................+++++++++++++++++++++++++++++++++++++++*.........+...+...+..+......+..........+.....+.+.........+..+...+............+....+...+...+...+..+.........+...+................+..+.......+...+...+.....+......+....+...........+...+.+.....+.+......+..+............+.+...+.........+.....+.......+........+.......+........+......+......................+..+......+............+.............+..+.......+..+...+..................+....+........+.+..+............+.+......+.....+...+...+.........+..........+.....................+..+.......+...+...........+....+........+...+......+.........+...................+..+.+..+...+....+......+...+..+.........+.+.....+.......+.....+......+.........+...+...+.+...+.....+.............+...+......+...+..+.+..+......+...............+......+.+..+.+.........+.....+.+......+........+.+.....+.........+.+......+......+.........+...+..+...+......+....+...........+....+..+..........+...+......+..+...+.+...++++++
+...+.....+....+...+..+.+.........+........+...+...+......+++++++++++++++++++++++++++++++++++++++*....+.....+.........+.+++++++++++++++++++++++++++++++++++++++*...........+.+......+.....................+.....+.......+..+.+..+......+....+......+.....+....+..+......+............+...............+......+......+.+...............+...+......+...+.................+.+...+.....+..........+..+............+.......+......+..+.......+........+.+...........+....+.....+......+...+..........+...+.....+..........+..+...+...............+...+.......+...+.........+..+....+......+......+..+.+...........+...............+.+...+..+.......+.....+.+..+.........+.........+.+......+.....+.......+...+..+.......+.........+.....+....+...+.........+.....+.............+.....+.......+...........+...+.+......+.........+.........+.....+.........+......+...........................+...+.......+..+.+.........+........+...+....+...+...+......+...+..+....+.....+.........+.......+.....+.........+..........+...............+.........+.....+.............+..+...+.......+...+........+.......+.........+...+...............+...+...++++++
+-----
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl create secret tls springboot-tls --key key.pem --cert cert.pem -n default
+secret/springboot-tls created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get secrets                                                               
+NAME             TYPE                DATA   AGE
+springboot-tls   kubernetes.io/tls   2      11s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get describe  secrets springboot-tls
+error: the server doesn't have a resource type "describe"
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl describe  secrets springboot-tls 
+Name:         springboot-tls
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Type:  kubernetes.io/tls
+
+Data
+====
+tls.crt:  1131 bytes
+tls.key:  1704 bytes
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete secret springboot-tls    
+secret "springboot-tls" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ cat key.pem | base64 | tr -d '\n' 
+LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRQzlOMTBuSjBXcHJLSXYKRGZYRDRmNTgrTXJiY1UzL0Q2Z01udDJtb0ZOT0MwWE4wa1BubFZ6VHc0VVlCRlhCV25HdTJaL0l2MklHaVNqVgorSmRIZksyRTg0dEZsZExSQU1sVmZHclNTSmRpWi8zdzMwNWZVbm5hMGdOM0NXSm9ZMjBkbFdWRi9nb1UxOTREClhMS29jOVp6S01HaWhURkxPVkhxemlYYTc5M09SeDFGSGlEbStobGpNa3VRaVJMemN1TVdMZ0tFZlB4YlFoZnEKejczay9qeHROd0R5QnE2Nm5sNkNVQWlqOW9waVR1b0wwL25JWUNkdWxYT0k1QTBJbW02bEp6TW4wSjErbklWUgpucGVKUWNIM3VtQzdqZVJPdUdCbHFSbC8yZXdGZjkxUVZubStvdXVjMUEwRjJiWDZ4akVSMStGaC95Q2J6bjZjCjNIUjZYaFhiQWdNQkFBRUNnZ0VBTzBNUnkrZUM3QWVEckZVaytqclg1L0JNS0xxdUFRcTRTV3VnWkVXbWtiVDYKSWVLUEhnTXIxYTlSQ2hxaGVUT0lrNGpaZ0poZ2JVZWNJSmdCV1lSMUhFVGpBK0pPNnVMaUxBSVJ1dGE5Z3phcQoxRHc4WWFLRlE4R3ZFQ05DVFF1RzYxTVZLdnpMejRka280enU3OCtJQlAxbzJDdjdLbUpEZzlVWkNoOUNTdzUwCi9DRVl6N3U0NDM0MUpWWnFtcHJYSVJJcUhtMWNQalJSVWYyYXBybWhLK29RTWtNdjZTRVNhVFg4YlNMSWd1cXcKZDNWK0MvMnpabVNqc3NOVTRkVDZWdDJWeStPemtXck56U2RYMW1LZHVSdUsva09OWkJPSnBDU1ZjTUF2aEJ6ZAo1TFc3bW5ZNmxZNGlTeUdPN3RUajlPRGNVdmRmclgwd0JsU0VpQzA5d1FLQmdRRGZ4bDBySUErNUhvanMrVTQyCmViWlUvZWhqRElzQzJDNnhxNDdhRGxYSjZ6SHY2OGtwY0JsYjB4TjZmUWx0SnlwaFdkblNCQTQwUmN2c3dCSVMKSWo0WGw1Z2VUTWtURUNaeURIdGlsQXlEZmQ0eEJtVEFqeU5reGNlQzlKRHRSS3dLK2xuMTRRNmxFeEVDU3lDbApWcGxhSC9hZGVOTWxGOUEwdkRLZEpkREI2d0tCZ1FEWWR2aGZ0Q2FvYW56cFQxSm91UWE5NDNseEVMdkp1WXZpCmZUcEwrYm5JM3A4UnQvK3VzYk5XVVhFM2JzeTNZM1pPMlNvbldXblVMWUJLTS9kNXJQRUJCZTFQd1Q1ZjFwS2UKOVBRTTVyVzZwb3M5N1pvajRMSXJ2dFY0Y2V2NXlTRUY3T0NNaXlxWmplc25XV3NXMzFndXMxd3krZHp6c29jcAppQUY3eHZrUDBRS0JnUURQc0hIa2hydFJHMUFHY1ZUd0pvTGQyMU1HS3l3U0ZjY3d5NE9vU3NuQXdIUDJzNlplCnVWWXY3WFlVcDF4S1hLRnUvVSszSm1Cd2o1ODNPd1VLbzVGeG9CZGxkK3Jmc0l1ZUtvdVI4TXEwZCt2eklIWCsKYWx0MU9rTnovYjFOR2dGN3B1UTcyd2dXbWQyZGZWRHRZN1NzK3lHUEFnY21WRFcvM0RRMXVsVkl4UUtCZ1FDawpQRC9lZlJVSG15UUM4TWdaNUtpVTBrNkYxcWhrT1g5RTdMYWFobkxMVVAxbnVDOHFJSEZ0QUlYaUJSTVY0VVVXCk5mYWh2RmxyUHNxamdpSTJFMTBYNWFOVWE4NGpjTzMxNU94MkRXVzhwRGZwV0trbXA0a0hYOWNmZDNBUEtPY0IKVStSYlBndW9UZUVwRGRNT200NlFnRTFuNytRUWtsZXl6eG94QzVwVXdRS0JnSGxOb2tabSt1VWFMMlBoOWxNNQpaUFRxYkJrV3BNb2FBNktXOEpTSk9IaTFvMm9Fa2xtSG56ZHR1ZGptR2dlbzgzbXN0U1MybUVoVWFwa1lmemRkCjl4N2wxQ1M3Y0k4SFZLYndWSUlicUsrSC9vMFB6UzNyNFRSY3hxZmtFMG5Dcnhjc0RkRHVLbVdxaUhEOXZCUlYKUWd0czRQaHkrMnRKakJTb3JUNkw0M1daCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ cat cert.pem | base64 | tr -d '\n'
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURGekNDQWYrZ0F3SUJBZ0lVQmVlVXorUEpESkNQSC9MVDNJZG1abjJvRXVZd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0d6RVpNQmNHQTFVRUF3d1FjM0J5YVc1blltOXZkQzVzYjJOaGJEQWVGdzB5TlRBek1UWXdOalEwTkROYQpGdzB5TmpBek1UWXdOalEwTkROYU1Cc3hHVEFYQmdOVkJBTU1FSE53Y21sdVoySnZiM1F1Ykc5allXd3dnZ0VpCk1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQzlOMTBuSjBXcHJLSXZEZlhENGY1OCtNcmIKY1UzL0Q2Z01udDJtb0ZOT0MwWE4wa1BubFZ6VHc0VVlCRlhCV25HdTJaL0l2MklHaVNqVitKZEhmSzJFODR0RgpsZExSQU1sVmZHclNTSmRpWi8zdzMwNWZVbm5hMGdOM0NXSm9ZMjBkbFdWRi9nb1UxOTREWExLb2M5WnpLTUdpCmhURkxPVkhxemlYYTc5M09SeDFGSGlEbStobGpNa3VRaVJMemN1TVdMZ0tFZlB4YlFoZnF6NzNrL2p4dE53RHkKQnE2Nm5sNkNVQWlqOW9waVR1b0wwL25JWUNkdWxYT0k1QTBJbW02bEp6TW4wSjErbklWUm5wZUpRY0gzdW1DNwpqZVJPdUdCbHFSbC8yZXdGZjkxUVZubStvdXVjMUEwRjJiWDZ4akVSMStGaC95Q2J6bjZjM0hSNlhoWGJBZ01CCkFBR2pVekJSTUIwR0ExVWREZ1FXQkJUbzVkdS9lcEYxZVFNcm5aUVdmWUdXSXBwcXNUQWZCZ05WSFNNRUdEQVcKZ0JUbzVkdS9lcEYxZVFNcm5aUVdmWUdXSXBwcXNUQVBCZ05WSFJNQkFmOEVCVEFEQVFIL01BMEdDU3FHU0liMwpEUUVCQ3dVQUE0SUJBUUNmWXBzcFdTb0xjQVorMm9vMk5lVG1ySmJyZXhmRTd6Q3hyZHFEdzI3cVRBK0YwREZDCjVleERUZGhaSW1MSVFtOThHdDZCcEhGckMrMjdiamVwQXE0cUdWdFRtUGtsQlA5djhTc3laR1daN3laM1BSeEoKSSs3MWhwVFNvYTlmM3Q5dkd4dDM2RXdjc2s2a2VGUjRBWEpLK3VjWFhSaCtkUVF6enlMTVFHQTg2V2drdDJDMwp4cWdjUkR4ZldrUnJTdSt5akRaVEJDaWZVTXNoVUN1UmFpd2drL3FEU2xLamZ3M1E4ZVpqQ0RvSVEwaTliZzFwCnFkM05Ha01ydDlXM0hNbFZiNFMrRVRMZWlWTkFvdDZ4MkJXU05kWk01UUdUZ2M0alZBSmpJdlpJNzF6YUJqZkcKbytZT1Y4Q3BMNW1QOHZTYkxXdE0rZGNJNlBCM015eC9GOTdQCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-https-ingress.yaml
+error: the path "springboot-https-ingress.yaml" does not exist
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ ls
+cert.pem  key.pem  rough.txt  springboot-single.yaml  springboot-tls-secret.yaml
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-tls-ingress.yaml
+error: the path "springboot-tls-ingress.yaml" does not exist
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-tls-ingress.yaml
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-tls-secret.yaml
+secret/springboot-tls created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl describe  secrets springboot-tls   
+Name:         springboot-tls
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Type:  kubernetes.io/tls
+
+Data
+====
+tls.crt:  1131 bytes
+tls.key:  1704 bytes
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl apply -f springboot-https-ingress.yaml
+ingress.networking.k8s.io/springboot-https-ingress created
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ minikube ip
+192.168.49.2
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ sudo nano /etc/hosts
+[sudo] password for ashfaq: 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ cat /etc/hosts                    
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+
+192.168.49.2 springboot.local
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ curl --insecure https://springboot.local/helloworld
+helloworld                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ 
+
+
+
+
+- Clear all the resource
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get all                               
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/springboot-deployment-559fb6b769-dzgjb   1/1     Running   0          18m
+
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes           ClusterIP   10.96.0.1      <none>        443/TCP   2d14h
+service/springboot-service   ClusterIP   10.100.28.15   <none>        80/TCP    18m
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/springboot-deployment   1/1     1            1           18m
+
+NAME                                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/springboot-deployment-559fb6b769   1         1         1       18m
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete secret springboot-tls    
+secret "springboot-tls" deleted
+                                                                                                                                                                                 
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete deployment springboot-deployment  -n default 
+deployment.apps "springboot-deployment" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete service springboot-service   -n default  
+service "springboot-service" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete pods springboot-deployment-559fb6b769-dzgjb                          
+Error from server (NotFound): pods "springboot-deployment-559fb6b769-dzgjb" not found
+                                                                                    
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get pods                                         
+No resources found in default namespace.
+                                                                                                                                                                                 
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl get ingress  -n default
+NAME                       CLASS   HOSTS              ADDRESS        PORTS     AGE
+springboot-https-ingress   nginx   springboot.local   192.168.49.2   80, 443   4m41s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ kubectl delete  ingress springboot-https-ingress  -n default
+ingress.networking.k8s.io "springboot-https-ingress" deleted
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ sudo nano /etc/hosts
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ cat /etc/hosts                                     
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+
+#192.168.49.2 springboot.local
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/https-rest-api]
+└─$ 

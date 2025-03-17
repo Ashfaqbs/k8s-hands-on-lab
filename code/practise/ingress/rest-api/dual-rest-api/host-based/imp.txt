@@ -1,0 +1,63 @@
+ since we are not trying host based routing for the same code we will remove all the old used resources which we performed in route based routing 
+
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s]
+└─$ kubectl get all                       
+NAME                                   READY   STATUS    RESTARTS       AGE
+pod/api1-deployment-56985b4fd7-mqf2r   1/1     Running   1 (6m3s ago)   7h34m
+pod/api2-deployment-75c7bd77d8-zk2x5   1/1     Running   1 (6m3s ago)   7h34m
+
+NAME                   TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+service/api1-service   ClusterIP   10.98.186.86     <none>        80/TCP    7h34m
+service/api2-service   ClusterIP   10.102.162.190   <none>        80/TCP    7h34m
+service/kubernetes     ClusterIP   10.96.0.1        <none>        443/TCP   2d8h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api1-deployment   1/1     1            1           7h34m
+deployment.apps/api2-deployment   1/1     1            1           7h34m
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/api1-deployment-56985b4fd7   1         1         1       7h34m
+replicaset.apps/api2-deployment-75c7bd77d8   1         1         1       7h34m
+                                                                                        
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl get ingress -n default
+NAME                       CLASS   HOSTS                                         ADDRESS        PORTS   AGE
+springboot-multi-ingress   nginx   springboot.local                              192.168.49.2   80      7h49m
+
+
+
+                                                                                                                                                                                                                     
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ kubectl delete pod api1-deployment-56985b4fd7-mqf2r api2-deployment-75c7bd77d8-zk2x5
+kubectl delete service api1-service api2-service
+kubectl delete deployment api1-deployment api2-deployment
+kubectl delete replicaset api1-deployment-56985b4fd7 api2-deployment-75c7bd77d8
+
+pod "api1-deployment-56985b4fd7-mqf2r" deleted
+pod "api2-deployment-75c7bd77d8-zk2x5" deleted
+service "api1-service" deleted
+service "api2-service" deleted
+deployment.apps "api1-deployment" deleted
+deployment.apps "api2-deployment" deleted
+Error from server (NotFound): replicasets.apps "api1-deployment-56985b4fd7" not found
+Error from server (NotFound): replicasets.apps "api2-deployment-75c7bd77d8" not found
+                                                                                                                                                                                                                    
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ 
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/ingress/rest-api/dual-rest-api/host-based]
+└─$ kubectl delete ingress springboot-multi-ingress
+ingress.networking.k8s.io "springboot-multi-ingress" deleted
+                                                                                                                                                                                 
+
+
+Note: Since the deployments were already deleted, we don’t need to worry about removing the ReplicaSets manually, as they were already cleaned up with the deployment.
+
+
+- remove the ip and host name from /etc/hosts
+- we can leave one for furture reference
+
+

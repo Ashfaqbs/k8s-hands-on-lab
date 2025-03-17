@@ -1,0 +1,148 @@
+# #API 1 Deployment
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: api1-deployment
+#   namespace: default
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: api1  # This matches the app label in the template and service
+#   template:
+#     metadata:
+#       labels:
+#         app: api1  # This label should match the selector in the service
+#     spec:
+#       containers:
+#       - name: springboot-api
+#         image: darksharkash/simplerestapisb-k8s  # Image for the container (ensure it's correct)
+#         ports:
+#         - containerPort: 8080  # The container is exposing port 8080
+
+# #API 1 Service
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: api1-service
+#   namespace: default
+# spec:
+#   selector:
+#     app: api1  # This matches the app label in the deployment
+#   ports:
+#   - port: 80  # The service exposes port 80 to other services/clients in the cluster
+#     targetPort: 8080  # Maps to the container's port 8080
+#   type: ClusterIP  # Default service type, accessible within the cluster
+
+# #API 2 Deployment
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: api2-deployment
+#   namespace: default
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: api2  # This matches the app label in the template and service
+#   template:
+#     metadata:
+#       labels:
+#         app: api2  # This label should match the selector in the service
+#     spec:
+#       containers:
+#       - name: springboot-api
+#         image: darksharkash/simplerestapisb-k8s  # Same image as API 1 (check if that's intended)
+#         ports:
+#         - containerPort: 8080  # The container is exposing port 8080
+
+# #API 2 Service
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: api2-service
+#   namespace: default
+# spec:
+#   selector:
+#     app: api2  # This matches the app label in the deployment
+#   ports:
+#     - port: 80  # The service exposes port 80 to other services/clients in the cluster
+#       targetPort: 8080  # Maps to the container's port 8080
+#   type: ClusterIP  # Default service type, accessible within the cluster
+
+
+
+# API 1 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api1-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api1
+  template:
+    metadata:
+      labels:
+        app: api1
+    spec:
+      containers:
+      - name: springboot-api
+        image: darksharkash/simplerestapisb-k8s
+        ports:
+        - containerPort: 8080
+---       
+#API 1 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api1-service
+  namespace: default
+spec:
+  selector:
+    app: api1
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+--- 
+#API 2 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api2-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api2
+  template:
+    metadata:
+      labels:
+        app: api2
+    spec:
+      containers:
+      - name: springboot-api
+        image: darksharkash/simplerestapisb-k8s
+        ports:
+        - containerPort: 8080
+
+---        
+#API 2 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api2-service
+  namespace: default
+spec:
+  selector:
+    app: api2
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
+
+  

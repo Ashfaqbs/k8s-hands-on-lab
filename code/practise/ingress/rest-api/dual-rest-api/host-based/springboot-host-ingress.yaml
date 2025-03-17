@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-host-ingress
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "api1.springboot.local"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api1-service
+            port:
+              number: 80
+  - host: "api2.springboot.local"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api2-service
+            port:
+              number: 80
+              
+#since in route based we had upadted this and diffrentiate with apis we can remove the host as we will have diffrent host for diffrent services i,e restapi 1 and 2 
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ minikube ip  
+# 192.168.49.2
+
+# ┌──(ashfaq㉿kali-vm)-[~/…/k8s/ingress/rest-api/dual-rest-api]
+# └─$ cat /etc/hosts             
+# 127.0.0.1       localhost
+# 127.0.1.1       kali-vm.kali.lab        kali-vm
+# 192.168.49.2  springboot.local  remove this, as this was used for earlier project route based project
+# add this 
+
+# # The following lines are desirable for IPv6 capable hosts
+# ::1     localhost ip6-localhost ip6-loopback
+# ff02::1 ip6-allnodes
+# ff02::2 ip6-allrouters
+                                                                                                                                                                                 

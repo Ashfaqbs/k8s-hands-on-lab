@@ -1,0 +1,344 @@
+rough flow -> install the nginx for ingress and verify its components are up and running 
+what composnents and what purpose please add 
+enable the inginx from minikube side why and What
+and create deployment and service object for our springboot api and test it out by portforwarding 
+and create the ingress for our code and map service and  and add the minikube ip in /etc/hosts in that apply the file and check out the pods , services
+and call the api to test 
+
+for this project /etc/hosts was
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ cat /etc/hosts             
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+192.168.49.2  springboot.local
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+
+/etc/host flow 
+Write springboot-ingress.yaml with host: springboot.local (no IP in the YAML—just the hostname).
+
+Add Minikube IP (e.g., 192.168.49.2) and springboot.local to /etc/hosts (not the YAML).
+
+Apply the YAML (kubectl apply -f springboot-ingress.yaml).
+
+Call the API (curl http://springboot.local/helloworld).
+
+
+
+
+
+
+
+
+kubectl apply -f springboot-app.yaml                                                                                                                                                            
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl apply -f springboot-app.yaml
+deployment.apps/springboot-api created
+service/springboot-api-service created
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get pods           
+NAME                              READY   STATUS              RESTARTS   AGE
+springboot-api-659c7c658b-tzvdh   0/1     ContainerCreating   0          12s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+springboot-api   0/1     1            0           25s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get services   
+NAME                     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes               ClusterIP   10.96.0.1      <none>        443/TCP   43h
+springboot-api-service   ClusterIP   10.107.55.27   <none>        80/TCP    31s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl port-forward service/springboot-api-service 8080:80 -n default
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get pods       
+NAME                              READY   STATUS    RESTARTS   AGE
+springboot-api-659c7c658b-tzvdh   1/1     Running   0          49s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl port-forward service/springboot-api-service 8080:80 -n default
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+Handling connection for 8080
+E0315 04:23:29.601886  104923 portforward.go:372] error copying from remote stream to local connection: readfrom tcp4 127.0.0.1:8080->127.0.0.1:55018: write tcp4 127.0.0.1:8080->127.0.0.1:55018: write: broken pipe
+
+
+Testing 
+
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s]
+└─$ curl http://localhost:8080/                      
+{"timestamp":"2025-03-15T11:24:36.835+00:00","status":404,"error":"Not Found","path":"/"}                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s]
+└─$ 
+
+
+                                                                                         
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s]
+└─$ curl http://localhost:8080/helloworld
+helloworld                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s]
+└─$ 
+
+
+
+
+- Working with ingress 
+- if not added add 
+
+
+           
+- Installing ingress             
+            
+                                                                                                                                                                                                                     
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+namespace/ingress-nginx created
+serviceaccount/ingress-nginx created
+serviceaccount/ingress-nginx-admission created
+role.rbac.authorization.k8s.io/ingress-nginx created
+role.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx created
+clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx created
+rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
+clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+configmap/ingress-nginx-controller created
+service/ingress-nginx-controller created
+service/ingress-nginx-controller-admission created
+deployment.apps/ingress-nginx-controller created
+job.batch/ingress-nginx-admission-create created
+job.batch/ingress-nginx-admission-patch created
+ingressclass.networking.k8s.io/nginx created
+validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
+                                                                                                                                                                                                                     
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get namespace                                                                                                    
+NAME              STATUS   AGE
+default           Active   42h
+dev               Active   42h
+ingress-nginx     Active   19s
+kube-node-lease   Active   42h
+kube-public       Active   42h
+kube-system       Active   42h
+
+                                                                                                                                                                                                                     
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get pods -n ingress-nginx
+NAME                                       READY   STATUS      RESTARTS   AGE
+ingress-nginx-admission-create-6mbw6       0/1     Completed   0          108s
+ingress-nginx-admission-patch-swzfh        0/1     Completed   1          108s
+ingress-nginx-controller-d8c96cf68-spr5n   1/1     Running     0          108s
+      
+
+
+
+
+- YAML file 
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-ingress
+  namespace: default
+spec:
+  ingressClassName: nginx  # Updated to use spec field instead of annotation
+  rules:
+  - host: "springboot.local"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: springboot-api-service
+            port:
+              number: 80
+
+
+OR 
+- annotation based 
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: springboot-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"  # Tells Kubernetes to use the NGINX Ingress Controller
+spec:
+  rules:
+  - host: "springboot.local"  # A fake domain for testing with Minikube
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: springboot-api-service
+            port:
+              number: 80
+
+
+- ─$ minikube addons enable ingress
+💡  ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+    ▪ Using image registry.k8s.io/ingress-nginx/controller:v1.11.3
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+🔎  Verifying ingress addon...
+🌟  The 'ingress' addon is enabled
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/ingress/rest-api]
+└─$ kubectl apply -f springboot-ingress.yaml         
+ingress.networking.k8s.io/springboot-ingress unchanged
+
+
+https://springboot.local/helloworld
+
+helloworld
+
+- some ingress commands 
+
+
+Ingress Commands Cheat Sheet
+
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+        Why: Sets up the NGINX Ingress Controller to handle traffic routing.
+        What: Deploys NGINX resources (pods, services, etc.) in ingress-nginx namespace.
+        Output:
+
+        namespace/ingress-nginx created
+        deployment.apps/ingress-nginx-controller created
+        ...
+
+            Lists created resources; no errors = success.
+    kubectl apply -f springboot-ingress.yaml
+        Why: Defines how traffic routes to our Spring Boot API.
+        What: Creates/updates the springboot-ingress resource with our rules.
+        Output:
+
+        ingress.networking.k8s.io/springboot-ingress created
+
+            "created" or "configured"; might warn about deprecated annotations if old format.
+    kubectl get ingress -n default
+        Why: Checks if our Ingress is active and has an IP.
+        What: Lists Ingress resources in default namespace.
+        Output:
+
+        NAME                 CLASS    HOSTS              ADDRESS        PORTS   AGE
+        springboot-ingress   <none>   springboot.local   192.168.49.2   80      5m
+
+            ADDRESS filled means it’s working; blank means trouble.
+    kubectl get pods -n ingress-nginx
+        Why: Ensures the Ingress Controller is running.
+        What: Shows pods in ingress-nginx namespace.
+        Output:
+
+        NAME                                       READY   STATUS    RESTARTS   AGE
+        ingress-nginx-controller-d8c96cf68-spr5n   1/1     Running   0          10m
+
+            1/1 Running = good; anything else needs fixing.
+    kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
+        Why: Debugs Ingress Controller issues.
+        What: Dumps NGINX pod logs.
+        Output:
+
+        [15/Mar/2025:12:00:00] "GET /helloworld HTTP/1.1" 200 ...
+
+            Request logs or errors (e.g., "port unavailable").
+    kubectl get service -n ingress-nginx
+        Why: Verifies the Ingress Controller’s external ports.
+        What: Lists services in ingress-nginx.
+        Output:
+
+        NAME                        TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+        ingress-nginx-controller    NodePort   10.96.x.x       <none>        80:31234/TCP,443:32456/TCP   15m
+
+            NodePort (e.g., 31234) is our external access point.
+    kubectl describe ingress springboot-ingress -n default
+        Why: Troubleshoots Ingress setup details.
+        What: Shows spec, events, and status.
+        Output:
+
+        Name:             springboot-ingress
+        Address:          192.168.49.2
+        Rules:            springboot.local  /  springboot-api-service:80
+        Events:           <success messages>
+
+            Errors in Events highlight issues.
+    minikube addons enable ingress
+        Why: Activates Minikube’s NGINX Ingress for easy setup.
+        What: Deploys a Minikube-tuned Ingress Controller.
+        Output:
+
+        * The 'ingress' addon is enabled
+
+            Confirms it’s on; pods start in ingress-nginx.
+    minikube addons list | grep ingress
+        Why: Checks Ingress addon status.
+        What: Filters addon list.
+        Output:
+
+        | ingress              | enabled    | ingress               |
+
+            enabled = active; disabled = off.
+    curl http://springboot.local/helloworld
+        Why: Tests if Ingress routes to our API.
+        What: Sends a request via our hostname.
+        Output:
+
+        Hello World
+
+            our API’s response; failure (e.g., Could not connect) means a problem.
+    curl http://192.168.49.2
+        Why: Tests Ingress Controller directly, skipping hostname.
+        What: Hits Minikube IP.
+        Output:
+
+        Hello World
+
+            Or 404; works here but not with hostname = routing/hosts issue.
+
+Quick Notes
+
+    These commands span setup (apply), monitoring (get, describe), and testing (curl).
+
+
+
+- clearing the resources
+
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl delete deployment springboot-api -n default
+kubectl delete service springboot-api-service -n default
+kubectl delete ingress springboot-ingress -n default
+deployment.apps "springboot-api" deleted
+service "springboot-api-service" deleted
+ingress.networking.k8s.io "springboot-ingress" deleted
+                                                         
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/ingress]
+└─$ kubectl get all -n default
+kubectl get pods -n ingress-nginx
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   47h
+NAME                                        READY   STATUS      RESTARTS   AGE
+ingress-nginx-admission-create-m6whn        0/1     Completed   0          114m
+ingress-nginx-admission-patch-xnpjj         0/1     Completed   0          114m
+ingress-nginx-controller-56d7c84fd4-zbnq5   1/1     Running     0          114m
+                                                                                                                                                                                                                     
