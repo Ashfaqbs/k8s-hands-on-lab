@@ -1,0 +1,157 @@
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ minikube addons enable ingress
+💡  ingress is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+    ▪ Using image registry.k8s.io/ingress-nginx/controller:v1.11.3
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+cd🔎  Verifying ingress addon...
+🌟  The 'ingress' addon is enabled
+                                                                                                                                                                                                
+
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ mkdir sb-api-ingress          
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm create restapiingress                
+
+Creating restapiingress
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl get pods -n ingress-nginx
+NAME                                        READY   STATUS      RESTARTS        AGE
+ingress-nginx-admission-create-m6whn        0/1     Completed   0               2d1h
+ingress-nginx-admission-patch-xnpjj         0/1     Completed   0               2d1h
+ingress-nginx-controller-56d7c84fd4-zbnq5   1/1     Running     5 (6h14m ago)   2d1h
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ 
+
+
+
+
+- update the deployment, service, liveness probe(optional) and ingress 
+- update the /etc/hosts
+
+
+minikube ip (they change FI after a restart)
+192.168.49.2  springboot.local
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ minikube ip                    
+192.168.49.2
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ cat /etc/hosts    
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+192.168.49.2 app.springboot.local api.springboot.local
+
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ sudo nano /etc/hosts
+[sudo] password for ashfaq: 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ cat /etc/hosts
+127.0.0.1       localhost
+127.0.1.1       kali-vm.kali.lab        kali-vm
+
+# Leaving one for reference
+# 192.168.49.2 api2.springboot.local
+192.168.49.2 springboot.local
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm install restapiingress ./restapiingress
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ pwd                                                                                                           
+/home/ashfaq/Desktop/code/k8s/helm/simple-rest-api
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ cd ..             
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/Desktop/code/k8s/helm]
+└─$ cd simple-rest-api/sb-api-ingress 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ helm install restapiingress ./restapiingress
+NAME: restapiingress
+LAST DEPLOYED: Mon Mar 17 08:52:39 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  http://springboot.local/
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ kubectl get all                  
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/restapiingress-df8b74795-n8trg   0/1     Running   0          11s
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes       ClusterIP   10.96.0.1       <none>        443/TCP    3d23h
+service/restapiingress   ClusterIP   10.98.157.129   <none>        8080/TCP   11s
+
+NAME                             READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/restapiingress   0/1     1            0           11s
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/restapiingress-df8b74795   1         1         0       11s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ kubectl get pods,svc,ing
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/restapiingress-df8b74795-n8trg   1/1     Running   0          34s
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes       ClusterIP   10.96.0.1       <none>        443/TCP    3d23h
+service/restapiingress   ClusterIP   10.98.157.129   <none>        8080/TCP   34s
+
+NAME                                       CLASS   HOSTS              ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/restapiingress   nginx   springboot.local             80      34s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ curl http://springboot.local/helloworld
+helloworld                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ 
+
+
+- Delete the resources
+
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ helm list                                   
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+restapiingress  default         1               2025-03-17 08:52:39.860334674 -0700 PDT deployed        restapiingress-0.1.0    1.16.0     
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ helm uninstall restapiingress
+release "restapiingress" uninstalled
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ kubectl get pods,svc,deployments,ing
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   3d23h
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress]
+└─$ 

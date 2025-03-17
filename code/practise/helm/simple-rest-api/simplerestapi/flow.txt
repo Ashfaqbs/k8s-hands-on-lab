@@ -1,0 +1,209 @@
+
+
+- create chart 
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm create simplerestapi
+
+Creating simplerestapi
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ cd simplerestapi/         
+                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ pwd               
+/home/ashfaq/Desktop/code/k8s/helm/simple-rest-api
+
+
+- update vaules.yml file (only updated deployment and service object and the liveness probe left is as it was)                                                                                                                                                                                        
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm install simplerestapi ./simplerestapi
+
+NAME: simplerestapi
+LAST DEPLOYED: Mon Mar 17 07:27:10 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services simplerestapi)
+  export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm list
+
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+simplerestapi   default         1               2025-03-17 07:27:10.665343371 -0700 PDT deployed        simplerestapi-0.1.0     1.16.0     
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl get all                                           
+NAME                              READY   STATUS    RESTARTS   AGE
+pod/simplerestapi-5c8dc85-gtzpw   0/1     Running   0          21s
+
+- the code was fine but due to this liveness endpoint check it was not coming up and not accessible 
+
+NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes      ClusterIP   10.96.0.1        <none>        443/TCP          3d22h
+service/simplerestapi   NodePort    10.106.124.114   <none>        8080:31181/TCP   22s
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/simplerestapi   0/1     1            0           22s
+
+NAME                                    DESIRED   CURRENT   READY   AGE
+replicaset.apps/simplerestapi-5c8dc85   1         1         0       22s
+                                                                             
+
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ minikube service simplerestapi --url
+
+http://192.168.49.2:31181
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ curl http://192.168.49.2:31181
+curl: (7) Failed to connect to 192.168.49.2 port 31181 after 0 ms: Could not connect to server
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl logs pod/simplerestapi-5c8dc85-gtzpw
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.0.1)
+
+2025-03-17T14:28:15.586Z  INFO 1 --- [           main] s.r.SpringBoot3RestApiExampleApplication : Starting SpringBoot3RestApiExampleApplication v0.0.1-SNAPSHOT using Java 17.0.13 with PID 1 (/app/app.jar started by root in /app)
+2025-03-17T14:28:15.593Z  INFO 1 --- [           main] s.r.SpringBoot3RestApiExampleApplication : No active profile set, falling back to 1 default profile: "default"
+2025-03-17T14:28:17.561Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2025-03-17T14:28:17.584Z  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-03-17T14:28:17.584Z  INFO 1 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.4]
+2025-03-17T14:28:17.738Z  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-03-17T14:28:17.741Z  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1940 ms
+2025-03-17T14:28:18.478Z  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2025-03-17T14:28:18.561Z  INFO 1 --- [           main] s.r.SpringBoot3RestApiExampleApplication : Started SpringBoot3RestApiExampleApplication in 4.392 seconds (process running for 5.753)
+2025-03-17T14:28:21.797Z  INFO 1 --- [nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-03-17T14:28:21.798Z  INFO 1 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-03-17T14:28:21.800Z  INFO 1 --- [nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+
+
+
+- liveness probe left is as it was so app was not accessible so we commented out the liveness probe in values.yml file and used upgrade command it will create the version 2 
+and deploy the code the code was accessible
+                                                                                                                                                             
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm upgrade simplerestapi ./simplerestapi
+
+Release "simplerestapi" has been upgraded. Happy Helming!
+NAME: simplerestapi
+LAST DEPLOYED: Mon Mar 17 07:37:10 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services simplerestapi)
+  export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl get all                                   
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/simplerestapi-6c6874c79c-cblrq   1/1     Running   0          26s
+
+NAME                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/kubernetes      ClusterIP   10.96.0.1        <none>        443/TCP          3d22h
+service/simplerestapi   NodePort    10.106.124.114   <none>        8080:31181/TCP   10m
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/simplerestapi   1/1     1            1           10m
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/simplerestapi-5c8dc85      0         0         0       10m
+replicaset.apps/simplerestapi-6c6874c79c   1         1         1       26s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ minikube service simplerestapi --url
+
+http://192.168.49.2:31181
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ curl http://192.168.49.2:31181
+
+{"timestamp":"2025-03-17T14:38:06.696+00:00","status":404,"error":"Not Found","path":"/"}                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ curl http://192.168.49.2:31181/helloworld
+
+helloworld                                                 
+
+
+
+
+
+output
+
+- via service url 
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ minikube service simplerestapi --url
+
+http://192.168.49.2:31181
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ curl http://192.168.49.2:31181
+
+{"timestamp":"2025-03-17T14:38:06.696+00:00","status":404,"error":"Not Found","path":"/"}                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ curl http://192.168.49.2:31181/helloworld
+
+helloworld   
+
+
+- portforwarding:
+
+──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl port-forward svc/simplerestapi 8080:8080
+
+Unable to listen on port 8080: Listeners failed to create with the following errors: [unable to create listener: Error listen tcp4 127.0.0.1:8080: bind: address already in use unable to create listener: Error listen tcp6 [::1]:8080: bind: address already in use]
+error: unable to listen on any of the requested ports: [{8080 8080}]
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl port-forward svc/simplerestapi 8081:8080
+
+Forwarding from 127.0.0.1:8081 -> 8080
+Forwarding from [::1]:8081 -> 8080
+Handling connection for 8081
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ curl http://localhost:8081/helloworld
+helloworld                                                                                                                                                                                                                                            
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ 
+
+
+- Clean  the resources
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ helm uninstall simplerestapi
+
+release "simplerestapi" uninstalled
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ kubectl get all
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   3d22h
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/simple-rest-api]
+└─$ 
+
+
+Issues seen 
+with liveness probe 
+modified the values in values.yaml and worked fine

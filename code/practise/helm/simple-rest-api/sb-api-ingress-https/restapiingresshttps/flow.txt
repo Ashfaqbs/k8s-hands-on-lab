@@ -1,0 +1,81 @@
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ helm create restapiingresshttps
+Creating restapiingresshttps
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ 
+
+
+create a cert folder and create cacert files in side root dir for the chart
+
+openssl req -x509 -newkey rsa:4096 -keyout tls.key -out tls.crt -days 365 -nodes -subj "/CN=springboot.local"
+......+....+.....+++++++++++++++++++++++++++++++++++++++++++++*........+.+.......................+......+....+......+...+..+...+...+....+..............+.+...+.....+......+.+.....+......+...............+...+....+..+.+...+..+.......+..+....+..............+...+...+.+++++++++++++++++++++++++++++++++++++++++++++*.....+.....+...+...+....+.....+.............+..+.+...+.........+.....+......+.........+......+....+...+..+......+.......+...+......+...+...........+...............+......+.+...+..+..................+....+...+.....+....+.....+........................+.+........+...+...+.+..............+.......+..+...............+.............+..+......+.+.....+.+........+.......+.....+...+...................+........+...............+....+.....+...+.+..+...........................+.......+........+.......+...+.....................+..+.......+..+.....................+............+.......+...+...+..............+..........+...+..+...+.......+...+........+.......+...+..+.+..+.........+.........+..........+......+.....+....+...........+.....................+.......+...........+.......+..................+......+...+......+.....+.+.....+...+.......+...........+.......+...+..+......+....+...........+....+...+.....+.......+...........+.+..................+..+....+.....+.......+..+...+....+.....+.+.........+...........+.......+++++
+..+....+...+....................+.+..+....+...........+...+.+...+..+....+..+...+....+......+.........+..+...+.+.....+.......+.........+...+..+.+...+.....+.........+......+.+.....+...+...+...+....+++++++++++++++++++++++++++++++++++++++++++++*.+......+.......+..+++++++++++++++++++++++++++++++++++++++++++++*..+...+..+......+.........+.+...+.........+........+.............+......+......+..+.+..+.........+.+..+................+.....+....+........+...+....+...+.....+.......+.....+................+.....+.........+.............+....................+...+.......+........+......+.........+......+..........+..................+............+.....+...+.+............+..+......+.........+.......+......+........+.......+.....+.........+...+...+.......+...+..+..........+...+...+.................+.........+.........+........................+..........+........+....+...+.....+..........+...+...........................+.....+......+......+....+.........+......+..+.........+...+...+....+........+......................+........+......+......+.........+.+...+..................+.........+++++
+-----
+
+- we will create a secret yaml file in templates of the chart and ask it to read the content from this folder cert files
+
+- update the deployment , services , ingress , livenessprobe (optional)
+- update the minikube ip and hostname in /etc/hosts
+
+
+
+
+
+
+
+
+install the chart and verfiy the resources 
+test the api 
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ helm install restapiingresshttps ./restapiingresshttps
+NAME: restapiingresshttps
+LAST DEPLOYED: Mon Mar 17 09:13:17 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  https://springboot.local/
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ kubectl get pods,svc,ing,deployments -n default
+NAME                                       READY   STATUS    RESTARTS   AGE
+pod/restapiingresshttps-667cbf6577-g84mq   1/1     Running   0          35s
+
+NAME                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes            ClusterIP   10.96.0.1        <none>        443/TCP    3d23h
+service/restapiingresshttps   ClusterIP   10.106.176.170   <none>        8080/TCP   36s
+
+NAME                                            CLASS   HOSTS              ADDRESS        PORTS     AGE
+ingress.networking.k8s.io/restapiingresshttps   nginx   springboot.local   192.168.49.2   80, 443   36s
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/restapiingresshttps   1/1     1            1           36s
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ curl --insecure https://springboot.local/helloworld
+helloworld                                                                                                                                                                                 
+
+
+
+
+clean the resources
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ helm list                                             
+NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                           APP VERSION
+restapiingresshttps     default         1               2025-03-17 09:13:17.174351396 -0700 PDT deployed        restapiingresshttps-0.1.0       1.16.0     
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ helm uninstall restapiingresshttps
+release "restapiingresshttps" uninstalled
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ kubectl get pods,svc,ing,deployments -n default
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   4d
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/helm/simple-rest-api/sb-api-ingress-https]
+└─$ 
