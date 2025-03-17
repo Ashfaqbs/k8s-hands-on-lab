@@ -1,0 +1,64 @@
+# PersistentVolumeClaim for PostgreSQL data storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc            # Name of the PersistentVolumeClaim
+  namespace: default            # Namespace where the PVC will be created
+spec:
+  accessModes:
+    - ReadWriteOnce             # The volume can be mounted as read-write by a single node
+  resources:
+    requests:
+      storage: 1Gi              # Requesting 1Gi of storage for PostgreSQL data
+
+---
+# Deployment for PostgreSQL pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment     # Name of the PostgreSQL deployment
+  namespace: default            # Namespace where the deployment will be created
+spec:
+  replicas: 1                   # Number of replicas (1 for single pod deployment)
+  selector:
+    matchLabels:
+      app: postgres             # Label selector to match pods in the deployment
+  template:
+    metadata:
+      labels:
+        app: postgres           # Label for the pod template to identify it as part of the deployment
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15      # PostgreSQL container image (version 15)
+        ports:
+        - containerPort: 5432   # Port for PostgreSQL inside the container
+        env:
+        - name: POSTGRES_DB
+          value: "mainschema"   # Default PostgreSQL database to be created
+        - name: POSTGRES_USER
+          value: "postgres"     # Default PostgreSQL user
+        - name: POSTGRES_PASSWORD
+          value: "admin"        # Default PostgreSQL password
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data  # Mount the persistent storage at this location in the container
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc  # Referencing the PVC created above
+
+---
+# Service to expose PostgreSQL to other pods within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service        # Name of the PostgreSQL service
+  namespace: default            # Namespace where the service will be created
+spec:
+  selector:
+    app: postgres               # The service will target pods with this label
+  ports:
+    - port: 5432                # Port the service will expose
+      targetPort: 5432          # The target port on the PostgreSQL container
+  type: ClusterIP               # The service is only accessible within the cluster

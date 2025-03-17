@@ -1,0 +1,118 @@
+apply the yaml file and call the apis 
+
+
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ kubectl get all                   
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/postgres-deployment-75cbc65f7-jfbhw      1/1     Running   0          32m
+pod/springboot-deployment-6d8fd4f4c6-9http   1/1     Running   0          25m
+
+NAME                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes           ClusterIP   10.96.0.1        <none>        443/TCP    2d21h
+service/postgres-service     ClusterIP   10.109.101.125   <none>        5432/TCP   32m
+service/springboot-service   ClusterIP   10.104.94.236    <none>        80/TCP     25m
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/postgres-deployment     1/1     1            1           32m
+deployment.apps/springboot-deployment   1/1     1            1           25m
+
+NAME                                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/postgres-deployment-75cbc65f7      1         1         1       32m
+replicaset.apps/springboot-deployment-6d8fd4f4c6   1         1         1       25m
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ curl -X POST -H "Content-Type: application/json" -d '{"name":"Ash","email":"ash@example.com"}' http://localhost:8080/api/users
+{"id":1,"name":"Ash","email":"ash@example.com"}                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ curl http://localhost:8080/api/users
+[{"id":1,"name":"Ash","email":"ash@example.com"}]                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ 
+
+- backend with new db is working fine
+either we can have a new db like this eg or point to existing db via env values 
+
+
+tested the ingress as well 
+
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ curl http://api.springboot.local/api/users         
+[{"id":1,"name":"Ash","email":"ash@example.com"}]                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ curl http://app.springboot.local/api/users
+[{"id":1,"name":"Ash","email":"ash@example.com"}]                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ 
+
+clear the resources 
+
+
+──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl get all 
+NAME                                         READY   STATUS    RESTARTS   AGE
+pod/postgres-deployment-75cbc65f7-7gx6s      1/1     Running   0          4m52s
+pod/springboot-deployment-6d8fd4f4c6-g294j   1/1     Running   0          4m7s
+
+NAME                         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes           ClusterIP   10.96.0.1       <none>        443/TCP    2d23h
+service/postgres-service     ClusterIP   10.106.20.137   <none>        5432/TCP   4m53s
+service/springboot-service   ClusterIP   10.99.245.23    <none>        80/TCP     4m7s
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/postgres-deployment     1/1     1            1           4m53s
+deployment.apps/springboot-deployment   1/1     1            1           4m7s
+
+NAME                                               DESIRED   CURRENT   READY   AGE
+replicaset.apps/postgres-deployment-75cbc65f7      1         1         1       4m52s
+replicaset.apps/springboot-deployment-6d8fd4f4c6   1         1         1       4m7s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl get ingress  -n default
+NAME          CLASS   HOSTS                                       ADDRESS        PORTS   AGE
+app-ingress   nginx   app.springboot.local,api.springboot.local   192.168.49.2   80      3m52s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubect get pvc                 
+Command 'kubect' not found, did you mean:
+  command 'kubectx' from deb kubectx
+Try: sudo apt install <deb name>
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl  get pvc
+NAME           STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+postgres-pvc   Bound    pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9   1Gi        RWO            standard       <unset>                 3h18m
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl  get pv 
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                  STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9   1Gi        RWO            Delete           Bound    default/postgres-pvc   standard       <unset>                          3h18m
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ # Delete specific resources
+kubectl delete pod postgres-deployment-75cbc65f7-7gx6s springboot-deployment-6d8fd4f4c6-g294j
+
+kubectl delete service postgres-service springboot-service
+
+kubectl delete ingress app-ingress -n default
+
+kubectl delete pvc postgres-pvc
+
+kubectl delete pv pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9
+
+pod "postgres-deployment-75cbc65f7-7gx6s" deleted
+pod "springboot-deployment-6d8fd4f4c6-g294j" deleted
+service "postgres-service" deleted
+service "springboot-service" deleted
+ingress.networking.k8s.io "app-ingress" deleted
+persistentvolumeclaim "postgres-pvc" deleted
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl get pv                  
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                  STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9   1Gi        RWO            Delete           Bound    default/postgres-pvc   standard       <unset>                          3h21m
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl delete pv pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9
+persistentvolume "pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9" deleted

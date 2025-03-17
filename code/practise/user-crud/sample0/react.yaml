@@ -1,0 +1,39 @@
+# Deployment configuration for React application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-deployment               # Name of the React deployment
+  namespace: default                    # Namespace where the deployment will be created
+spec:
+  replicas: 1                           # Number of replicas (single replica here)
+  selector:
+    matchLabels:
+      app: react                         # Label selector to match pods in the deployment
+  template:
+    metadata:
+      labels:
+        app: react                       # Label for the pod template to identify it as part of the deployment
+    spec:
+      containers:
+      - name: react
+        image: darksharkash/user-web:v2   # Docker image for the React application (version v3)
+        ports:
+        - containerPort: 80              # Expose port 80 inside the container
+        env:
+        - name: VITE_API_URL
+          #value: "http://springboot-service/api/users"  # Internal Kubernetes DNS URL for the Spring Boot API service
+          value: "http://app.springboot.local/api/users"
+---
+# Service configuration to expose React application
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-service                    # Name of the React service
+  namespace: default                     # Namespace where the service will be created
+spec:
+  selector:
+    app: react                           # The service will target pods with this label
+  ports:
+    - port: 80                            # Expose port 80 externally to access the service
+      targetPort: 80                      # Forward traffic to port 80 on the React container
+  type: ClusterIP                        # The service is only accessible within the Kubernetes cluster

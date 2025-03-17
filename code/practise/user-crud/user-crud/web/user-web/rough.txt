@@ -1,0 +1,20 @@
+npm create vite@latest user-web -- --template react
+
+cd user-web
+
+npm install
+
+npm install axios react-router-dom
+
+add the code use env variable for url and test with local host - done
+build the code and preview - done
+create the docker image - done
+run the image and pass the url as env value and before that run the backend container pass all of its env value done 
+
+
+C:\tmp\full-stack\user-crud>docker run -p 8080:8080  -e DB_URL=jdbc:postgresql://host.docker.internal:9991/mainschema   -e DB_USERNAME=postgres  -e DB_PASSWORD=admin darksharkash/user-webservice:v1
+
+
+C:\tmp\full-stack\user-crud\web\user-web>docker run -p 3000:80 -e VITE_API_URL=http://host.docker.internal:8080/api/users darksharkash/user-web:v2
+
+push the code to registry 

@@ -1,0 +1,55 @@
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl apply -f postgres.yaml
+
+persistentvolumeclaim/postgres-pvc created
+deployment.apps/postgres-deployment created
+service/postgres-service created
+                                                                                                                                                                                                
+                                                                                                                                                                                               
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl get pods,svc,pvc -n default
+NAME                                      READY   STATUS    RESTARTS   AGE
+pod/postgres-deployment-75cbc65f7-jfbhw   1/1     Running   0          2m47s
+
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/kubernetes         ClusterIP   10.96.0.1        <none>        443/TCP    2d20h
+service/postgres-service   ClusterIP   10.109.101.125   <none>        5432/TCP   2m47s
+
+NAME                                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/postgres-pvc   Bound    pvc-5f4d9fa7-19a4-4641-b821-406ee6b43ee9   1Gi        RWO            standard       <unset>                 2m47s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl exec -it postgres-deployment-75cbc65f7-jfbhw -- /bin/bash
+
+root@postgres-deployment-75cbc65f7-jfbhw:/# psql -U postgres -d mainschema
+psql (15.12 (Debian 15.12-1.pgdg120+1))
+Type "help" for help.
+
+To list all tables:
+mainschema=# \dt
+Did not find any relations.
+
+
+- post working with app
+
+┌──(ashfaq㉿kali-vm)-[~/…/k8s/full-stack/user-crud/sample0]
+└─$ kubectl exec -it postgres-deployment-75cbc65f7-jfbhw -- /bin/bash 
+root@postgres-deployment-75cbc65f7-jfbhw:/# psql -U postgres -d mainschema
+psql (15.12 (Debian 15.12-1.pgdg120+1))
+Type "help" for help.
+
+mainschema=# \dt
+         List of relations
+ Schema | Name  | Type  |  Owner   
+--------+-------+-------+----------
+ public | users | table | postgres
+(1 row)
+
+mainschema=# select * from users;
+ id |      email      | name 
+----+-----------------+------
+  1 | ash@example.com | Ash
+(1 row)
+
+mainschema=# 
+

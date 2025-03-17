@@ -1,0 +1,43 @@
+# Deployment configuration for Spring Boot application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-deployment         # Name of the Spring Boot deployment
+  namespace: default                  # Namespace where the deployment will be created
+spec:
+  replicas: 1                         # Number of replicas for the Spring Boot app (single replica here)
+  selector:
+    matchLabels:
+      app: springboot                 # Label selector to match pods in the deployment
+  template:
+    metadata:
+      labels:
+        app: springboot               # Label for the pod template to identify it as part of the deployment
+    spec:
+      containers:
+      - name: springboot
+        image: darksharkash/user-webservice:v1  # Docker image for the Spring Boot application
+        ports:
+        - containerPort: 8080          # Expose port 8080 inside the container
+        env:
+        - name: DB_URL
+          value: "jdbc:postgresql://postgres-service:5432/mainschema"  # Database URL (connects to PostgreSQL service)
+        - name: DB_USERNAME
+          value: "postgres"            # Database username for authentication
+        - name: DB_PASSWORD
+          value: "admin"               # Database password for authentication
+
+---
+# Service configuration to expose Spring Boot application
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-service            # Name of the Spring Boot service
+  namespace: default                  # Namespace where the service will be created
+spec:
+  selector:
+    app: springboot                   # The service will target pods with this label
+  ports:
+    - port: 80                         # Expose port 80 externally to access the service
+      targetPort: 8080                  # Forward traffic to port 8080 on the Spring Boot container
+  type: ClusterIP                      # The service is only accessible within the Kubernetes cluster

@@ -1,0 +1,1 @@
+- few issues like cors with portforwarded backend app passed as url as env value in react yml and also ingress url for backend passed as env value in react yaml 

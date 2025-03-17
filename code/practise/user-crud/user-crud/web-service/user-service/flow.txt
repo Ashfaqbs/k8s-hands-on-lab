@@ -1,0 +1,5 @@
+code with actual db test -done  and working
+code with env values and defaults make jar and test - done and working
+create docker image and when running pass env values and test - done and working
+push the image to registry and verify -  done 
+darksharkash/user-webservice
