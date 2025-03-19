@@ -1,0 +1,6 @@
+apiVersion: v2
+name: crud-app-ext-pg
+description: Spring Boot CRUD app with external Postgres, Ingress and HTTPS
+type: application
+version: 0.1.0
+appVersion: "1.16.0"

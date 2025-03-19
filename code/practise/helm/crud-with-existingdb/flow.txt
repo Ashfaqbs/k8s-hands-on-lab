@@ -1,0 +1,318 @@
+- minikube start 
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ minikube start           
+😄  minikube v1.35.0 on Debian kali-rolling (vbox/amd64)
+✨  Using the docker driver based on existing profile
+👍  Starting "minikube" primary control-plane node in "minikube" cluster
+🚜  Pulling base image v0.0.46 ...
+🔄  Restarting existing docker container for "minikube" ...
+🐳  Preparing Kubernetes v1.32.0 on Docker 27.4.1 ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+    ▪ Using image registry.k8s.io/ingress-nginx/controller:v1.11.3
+    ▪ Using image registry.k8s.io/metrics-server/metrics-server:v0.7.2
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+    ▪ Using image registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.4
+🔎  Verifying ingress addon...
+🌟  Enabled addons: metrics-server, storage-provisioner, ingress, default-storageclass
+
+❗  /usr/local/bin/kubectl is version 1.22.0, which may have incompatibilities with Kubernetes 1.32.0.
+    ▪ Want kubectl v1.32.0? Try 'minikube kubectl -- get pods -A'
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ minikube docker-env
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.49.2:2376"
+export DOCKER_CERT_PATH="/home/ashfaq/.minikube/certs"
+export MINIKUBE_ACTIVE_DOCKERD="minikube"
+
+# To point your shell to minikube's docker-daemon, run:
+# eval $(minikube -p minikube docker-env)
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ eval $(minikube -p minikube docker-env)
+
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ minikube status    
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+docker-env: in-use
+
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$      
+
+
+
+
+- update the chart for meta data , update the values like image, version, ingress , path (update /etc/hosts with minikube ip and hostname ), service and port , liveness and readiness, 
+add a custom value postgresvalues and forward or read in secret file a new file in template and in deployment file for  this code read from the secrets and update the ip properly for the db host 
+
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ helm install crud-app-ext-pg ./crud-app-ext-pg
+NAME: crud-app-ext-pg
+LAST DEPLOYED: Tue Mar 18 23:59:16 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  http://springboot.local/api
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl get all                                 
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/crud-app-ext-pg-fdd95967-p5vnz   0/1     Running   0          5s
+
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/crud-app-ext-pg   ClusterIP   10.105.255.32   <none>        8080/TCP   6s
+service/kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP    5d14h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/crud-app-ext-pg   0/1     1            0           6s
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/crud-app-ext-pg-fdd95967   1         1         0       6s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl get all
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/crud-app-ext-pg-fdd95967-p5vnz   0/1     Running   0          13s
+
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/crud-app-ext-pg   ClusterIP   10.105.255.32   <none>        8080/TCP   14s
+service/kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP    5d14h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/crud-app-ext-pg   0/1     1            0           14s
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/crud-app-ext-pg-fdd95967   1         1         0       14s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl describe pod/crud-app-ext-pg-fdd95967-p5vnz      
+Name:         crud-app-ext-pg-fdd95967-p5vnz
+Namespace:    default
+Priority:     0
+Node:         minikube/192.168.49.2
+Start Time:   Tue, 18 Mar 2025 23:59:17 -0700
+Labels:       app.kubernetes.io/instance=crud-app-ext-pg
+              app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=crud-app-ext-pg
+              app.kubernetes.io/version=1.16.0
+              helm.sh/chart=crud-app-ext-pg-0.1.0
+              pod-template-hash=fdd95967
+Annotations:  <none>
+Status:       Running
+IP:           10.244.0.64
+IPs:
+  IP:           10.244.0.64
+Controlled By:  ReplicaSet/crud-app-ext-pg-fdd95967
+Containers:
+  crud-app-ext-pg:
+    Container ID:   docker://97ea83ba4b6d290b553e0c1596275ac2d4d8cac8dc3699ee03bc20851fc384c8
+    Image:          darksharkash/user-webservice:v1
+    Image ID:       docker-pullable://darksharkash/user-webservice@sha256:d72a649a8c7cf906fe278c0cb6be43630e94909b16eba83e24b539f135ece118
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Tue, 18 Mar 2025 23:59:19 -0700
+    Ready:          False
+    Restart Count:  0
+    Liveness:       http-get http://:8080/api/users delay=30s timeout=5s period=10s #success=1 #failure=3
+    Readiness:      http-get http://:8080/api/users delay=30s timeout=5s period=10s #success=1 #failure=3
+    Environment:
+      DB_URL:       jdbc:postgresql://10.0.2.15:5432/mainschema
+      DB_USERNAME:  <set to the key 'username' in secret 'crud-app-ext-pg-secret'>  Optional: false
+      DB_PASSWORD:  <set to the key 'password' in secret 'crud-app-ext-pg-secret'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-9j8tf (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-9j8tf:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  32s   default-scheduler  Successfully assigned default/crud-app-ext-pg-fdd95967-p5vnz to minikube
+  Normal  Pulled     30s   kubelet            Container image "darksharkash/user-webservice:v1" already present on machine
+  Normal  Created    30s   kubelet            Created container: crud-app-ext-pg
+  Normal  Started    30s   kubelet            Started container crud-app-ext-pg
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl get all                                    
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/crud-app-ext-pg-fdd95967-p5vnz   1/1     Running   0          37s
+
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/crud-app-ext-pg   ClusterIP   10.105.255.32   <none>        8080/TCP   38s
+service/kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP    5d14h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/crud-app-ext-pg   1/1     1            1           38s
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/crud-app-ext-pg-fdd95967   1         1         1       38s
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl http://springboot.local/api/users
+[{"id":1,"name":"Ash","email":"ash@example.com"}]                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl -X POST http://springboot.local/api/users \
+    -H "Content-Type: application/json" \
+    -d '{"name": "John", "email": "john@example.com"}'
+
+{"id":2,"name":"John","email":"john@example.com"}                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl http://springboot.local/api/users          
+[{"id":1,"name":"Ash","email":"ash@example.com"},{"id":2,"name":"John","email":"john@example.com"}]                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl -X DELETE http://springboot.local/api/users/2
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl http://springboot.local/api/users            
+[{"id":1,"name":"Ash","email":"ash@example.com"}]                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+
+
+
+- Delete the resources
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ helm list                                     
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
+crud-app-ext-pg default         1               2025-03-18 23:59:16.412653834 -0700 PDT deployed        crud-app-ext-pg-0.1.0   1.16.0     
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ helm uninstall crud-app-ext-pg
+release "crud-app-ext-pg" uninstalled
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   5d14h
+                                                                                                                                                                                                
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+
+
+
+Verify in DB
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ psql -h 10.0.2.15 -U postgres -d mainschema -W
+
+Password:admin
+psql (16.3 (Debian 16.3-1), server 17.4 (Debian 17.4-1.pgdg120+2))
+WARNING: psql major version 16, server major version 17.
+         Some psql features might not work.
+Type "help" for help.
+
+mainschema=# select * from users;
+ id | name |      email      
+----+------+-----------------
+  1 | Ash  | ash@example.com
+(1 row)
+
+mainschema=# 
+
+
+
+
+
+-- Updated to https and we had hardcoded the username and passwords in values.yaml  we have moved to templates/tls-and-db-secret.yaml file and  referecing the values to env values in deployment.yaml file from here
+
+for https we created the custom certs and key and updated in ingress of values.yaml
+
+- testing
+
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl --insecure -X POST https://springboot.local/api/users \
+    -H "Content-Type: application/json" \
+    -d '{"name": "John", "email": "john@example.com"}'
+
+{"id":3,"name":"John","email":"john@example.com"}                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl --insecure https://springboot.local/api/users          
+[{"id":1,"name":"Ash","email":"ash@example.com"},{"id":3,"name":"John","email":"john@example.com"}]                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl --insecure https://springboot.local/api/users/2
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ curl --insecure https://springboot.local/api/users/3
+{"id":3,"name":"John","email":"john@example.com"}                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+
+
+ DB check 
+
+ ┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ psql -h 10.0.2.15 -U postgres -d mainschema -W
+Password: 
+psql (16.3 (Debian 16.3-1), server 17.4 (Debian 17.4-1.pgdg120+2))
+WARNING: psql major version 16, server major version 17.
+         Some psql features might not work.
+Type "help" for help.
+
+mainschema=# select * from users;
+ id | name |      email       
+----+------+------------------
+  1 | Ash  | ash@example.com
+  3 | John | john@example.com
+(2 rows)
+
+mainschema=# 
+\q
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 
+
+
+ Clearing the resources
+
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ helm uninstall crud-app-ext-pg                
+release "crud-app-ext-pg" uninstalled
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ kubectl get all                                      
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   5d17h
+                                                                                                                                                                                 
+┌──(ashfaq㉿kali-vm)-[~/…/code/k8s/helm/crud-with-existingdb]
+└─$ 

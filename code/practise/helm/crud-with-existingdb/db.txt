@@ -1,0 +1,288 @@
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker ps             
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker run -d --name pg-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:latest
+9b9c54ecefeea7f0866b50df36ba834b5ac9d555667729e1c4f076c8e5ad6c1f
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker logs 9b                                                                       
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+waiting for server to start....2025-03-19 01:24:25.637 UTC [48] LOG:  starting PostgreSQL 17.4 (Debian 17.4-1.pgdg120+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-03-19 01:24:25.640 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-03-19 01:24:25.648 UTC [51] LOG:  database system was shut down at 2025-03-19 01:24:24 UTC
+2025-03-19 01:24:25.654 UTC [48] LOG:  database system is ready to accept connections
+ done
+server started
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+2025-03-19 01:24:25.867 UTC [48] LOG:  received fast shutdown request
+waiting for server to shut down....2025-03-19 01:24:25.879 UTC [48] LOG:  aborting any active transactions
+2025-03-19 01:24:25.881 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+2025-03-19 01:24:25.885 UTC [49] LOG:  shutting down
+2025-03-19 01:24:25.890 UTC [49] LOG:  checkpoint starting: shutdown immediate
+2025-03-19 01:24:25.926 UTC [49] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.002 s, total=0.041 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/14E4FA0, redo lsn=0/14E4FA0
+2025-03-19 01:24:25.931 UTC [48] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2025-03-19 01:24:26.001 UTC [1] LOG:  starting PostgreSQL 17.4 (Debian 17.4-1.pgdg120+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
+2025-03-19 01:24:26.003 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-03-19 01:24:26.003 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-03-19 01:24:26.009 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-03-19 01:24:26.019 UTC [62] LOG:  database system was shut down at 2025-03-19 01:24:25 UTC
+2025-03-19 01:24:26.026 UTC [1] LOG:  database system is ready to accept connections
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker exec -it pg-db psql -U postgres
+psql (17.4 (Debian 17.4-1.pgdg120+2))
+Type "help" for help.
+
+
+
+
+- have user and creds and db and table
+
+root                                                                                                                                                                                                                                            
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker exec -it pg-db psql -U postgres
+psql (17.4 (Debian 17.4-1.pgdg120+2))
+Type "help" for help.
+
+postgres=# CREATE DATABASE mainschema;
+CREATE DATABASE
+postgres=# CREATE DATABASE mainschema;
+ERROR:  database "mainschema" already exists
+postgres=# GRANT ALL PRIVILEGES ON DATABASE mainschema TO postgres;
+GRANT
+
+postgres=# \c mainschema;
+You are now connected to database "mainschema" as user "postgres".
+mainschema=# CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255),
+  email VARCHAR(255)
+);
+CREATE TABLE
+mainschema=# INSERT INTO users (name, email) VALUES ('Ash', 'ash@example.com');
+INSERT 0 1
+mainschema=# GRANT ALL PRIVILEGES ON TABLE users TO postgres;
+GRANT
+mainschema=# select * from users;
+ id | name |      email      
+----+------+-----------------
+  1 | Ash  | ash@example.com
+(1 row)
+
+mainschema=# 
+
+
+
+admin pass was not working alter and Test
+
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker exec -it pg-db psql -U postgres
+psql (17.4 (Debian 17.4-1.pgdg120+2))
+Type "help" for help.
+
+postgres=# ALTER USER postgres WITH PASSWORD 'admin';
+ALTER ROLE
+postgres=# /q
+postgres-# 
+                                                                                                                                                                                                                                       
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ psql -h 10.0.2.15 -U postgres -d mainschema -W
+Password:admin
+psql (16.3 (Debian 16.3-1), server 17.4 (Debian 17.4-1.pgdg120+2))
+WARNING: psql major version 16, server major version 17.
+         Some psql features might not work.
+Type "help" for help.
+
+mainschema=# SELECT * FROM users;
+ id | name |      email      
+----+------+-----------------
+  1 | Ash  | ash@example.com
+(1 row)
+
+mainschema=# 
+
+
+
+
+
+
+
+
+
+
+
+ip for db 
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ ip addr show  # Look for your network interface (e.g., eth0)
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:f4:e6:15 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute eth0
+       valid_lft 66408sec preferred_lft 66408sec
+    inet6 fe80::a00:27ff:fef4:e615/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: br-26719e8ee25e: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:ad:e7:78:c3 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.49.1/24 brd 192.168.49.255 scope global br-26719e8ee25e
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:adff:fee7:78c3/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+4: docker0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:3c:17:89:be brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:3cff:fe17:89be/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+5: br-f03c609d1ce1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:25:8b:e7:da brd ff:ff:ff:ff:ff:ff
+    inet 172.23.0.1/16 brd 172.23.255.255 scope global br-f03c609d1ce1
+       valid_lft forever preferred_lft forever
+7: veth7aa71bd@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master docker0 state UP group default 
+    link/ether ce:8c:a3:54:ce:f4 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::cc8c:a3ff:fe54:cef4/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+11: vethc898139@if10: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-26719e8ee25e state UP group default 
+    link/ether ce:32:08:39:92:f7 brd ff:ff:ff:ff:ff:ff link-netnsid 1
+    inet6 fe80::cc32:8ff:fe39:92f7/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+                                                                                                                                                                                                                                            
+┌──(ashfaq㉿kali-vm)-[~]
+
+psql -h 10.0.2.15 -U postgres -d mainschema -W
+password: admin
+
+- worked fine
+
+
+
+
+
+
+
+
+
+
+- sample DB created 
+postgres=# CREATE DATABASE imagedb;
+CREATE DATABASE
+postgres=# dl
+postgres-# /dl
+postgres-# CREATE USER imageuser WITH PASSWORD 'imagepass123';
+ERROR:  syntax error at or near "dl"
+LINE 1: dl
+        ^
+postgres=#   
+CREATE USER imageuser WITH PASSWORD 'imagepass123';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE imagedb TO imageuser;
+GRANT
+postgres=# \c imagedb
+You are now connected to database "imagedb" as user "postgres".
+imagedb=# CREATE TABLE images (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255),
+  data BYTEA
+);
+CREATE TABLE
+imagedb=# GRANT ALL PRIVILEGES ON TABLE images TO imageuser;
+GRANT
+imagedb=# 
+\q
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ 
+
+
+
+- Test connect with IP
+
+
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ ip addr show  # Look for your network interface (e.g., eth0)
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:f4:e6:15 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute eth0
+       valid_lft 85643sec preferred_lft 85643sec
+    inet6 fe80::a00:27ff:fef4:e615/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: br-26719e8ee25e: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:ad:e7:78:c3 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.49.1/24 brd 192.168.49.255 scope global br-26719e8ee25e
+       valid_lft forever preferred_lft forever
+4: docker0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:3c:17:89:be brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:3cff:fe17:89be/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+5: br-f03c609d1ce1: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:25:8b:e7:da brd ff:ff:ff:ff:ff:ff
+    inet 172.23.0.1/16 brd 172.23.255.255 scope global br-f03c609d1ce1
+       valid_lft forever preferred_lft forever
+7: veth7aa71bd@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master docker0 state UP group default 
+    link/ether ce:8c:a3:54:ce:f4 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::cc8c:a3ff:fe54:cef4/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' pg-db
+
+172.17.0.2
+                                                                                                                                                                                                                                           
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ docker exec -it pg-db psql -h 172.17.0.2  -U imageuser -d imagedb -W
+Password: 
+psql (17.4 (Debian 17.4-1.pgdg120+2))
+Type "help" for help.
+
+imagedb=>                                                                                                                                                                                                                                  
+┌──(ashfaq㉿kali-vm)-[~]
+└─$ 
