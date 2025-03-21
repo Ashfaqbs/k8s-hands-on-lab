@@ -1,0 +1,19 @@
+HPA FLOW 
+
+
+Ubuntu-VM% kubectl get hpa
+NAME              REFERENCE                    TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+crud-app-ext-pg   Deployment/crud-app-ext-pg   cpu: 5%/20%, memory: 73%/30%   1         3         3          30m
+Ubuntu-VM% 
+
+- Cleaning the resources
+
+
+Ubuntu-VM% helm uninstall crud-app-ext-pg                
+release "crud-app-ext-pg" uninstalled
+Ubuntu-VM% kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   38h
+Ubuntu-VM% 
+
+
