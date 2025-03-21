@@ -1,0 +1,83 @@
+HPA was not working as there was intendation issue for resources tag as it was beneath the ingress and was not parsed properly 
+
+
+```
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: springboot.local
+      paths:
+        - path: /api
+          pathType: Prefix
+  tls:
+    - secretName: crud-app-tls-and-db  # New Secret name
+      hosts:
+        - springboot.local
+
+  resources:
+  limits:
+    cpu: "500m"  
+    memory: "512Mi"
+  requests:
+    cpu: "100m"  
+    memory: "256Mi"
+```
+
+changed to 
+
+```
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: springboot.local
+      paths:
+        - path: /api
+          pathType: Prefix
+  tls:
+    - secretName: crud-app-tls-and-db  # New Secret name
+      hosts:
+        - springboot.local
+
+resources:
+  limits:
+    cpu: "500m"  
+    memory: "512Mi"
+  requests:
+    cpu: "100m"  
+    memory: "256Mi"
+
+
+
+
+
+```
+
+
+Resources was very low for application start causing Liveness probe to fail first ,so we increased the resources 
+
+
+```
+resources:
+  limits:
+    cpu: "500m"  
+    memory: "512Mi"
+  requests:
+    cpu: "100m"  
+    memory: "256Mi"
+
+    
+```
+
+As we deleted Kali and jumped on Ubuntu.
+We had configured the ip of docker which failed in connected then we ran as host ip for new PG db more info in db file .
+
