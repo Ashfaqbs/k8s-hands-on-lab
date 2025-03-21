@@ -1,0 +1,164 @@
+helm in ubuntu  OS output 
+
+Ubuntu-VM% helm install crud-app-ext-pg ./crud-app-ext-pg
+NAME: crud-app-ext-pg
+LAST DEPLOYED: Fri Mar 21 11:59:38 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  https://springboot.local/api
+
+
+
+
+
+Ubuntu-VM% kubectl get all                                      
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/crud-app-ext-pg-5654779865-4bzhq   1/1     Running   0          5m13s
+pod/crud-app-ext-pg-5654779865-7l74w   1/1     Running   0          5m13s
+pod/crud-app-ext-pg-5654779865-mw2zr   1/1     Running   0          6m29s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/crud-app-ext-pg   ClusterIP   10.111.234.153   <none>        8080/TCP   6m29s
+service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP    38h
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/crud-app-ext-pg   3/3     3            3           6m29s
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/crud-app-ext-pg-5654779865   3         3         3       6m29s
+
+NAME                                                  REFERENCE                    TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/crud-app-ext-pg   Deployment/crud-app-ext-pg   cpu: 9%/20%, memory: 70%/30%   1         3         3          6m29s
+
+
+
+Ubuntu-VM% kubectl describe pod/crud-app-ext-pg-5654779865-4bzhq
+Name:             crud-app-ext-pg-5654779865-4bzhq
+Namespace:        default
+Priority:         0
+Service Account:  crud-app-ext-pg
+Node:             minikube/192.168.58.2
+Start Time:       Fri, 21 Mar 2025 12:00:55 +0530
+Labels:           app.kubernetes.io/instance=crud-app-ext-pg
+                  app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=crud-app-ext-pg
+                  app.kubernetes.io/version=1.16.0
+                  helm.sh/chart=crud-app-ext-pg-0.1.0
+                  pod-template-hash=5654779865
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.27
+IPs:
+  IP:           10.244.0.27
+Controlled By:  ReplicaSet/crud-app-ext-pg-5654779865
+Containers:
+  crud-app-ext-pg:
+    Container ID:   docker://ac997b6d9ba31485aa8c72ffd18bd862e43091cfb77227bfdf6d21db78b2374b
+    Image:          darksharkash/user-webservice:v1
+    Image ID:       docker-pullable://darksharkash/user-webservice@sha256:d72a649a8c7cf906fe278c0cb6be43630e94909b16eba83e24b539f135ece118
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 21 Mar 2025 12:00:56 +0530
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   256Mi
+    Liveness:   http-get http://:8080/api/users delay=30s timeout=5s period=10s #success=1 #failure=3
+    Readiness:  http-get http://:8080/api/users delay=30s timeout=5s period=10s #success=1 #failure=3
+    Environment:
+      DB_URL:       jdbc:postgresql://10.0.2.15:5432/mainschema
+      DB_USERNAME:  <set to the key 'username' in secret 'crud-app-tls-and-db'>  Optional: false
+      DB_PASSWORD:  <set to the key 'password' in secret 'crud-app-tls-and-db'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-xfx2q (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-xfx2q:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  5m29s  default-scheduler  Successfully assigned default/crud-app-ext-pg-5654779865-4bzhq to minikube
+  Normal  Pulled     5m28s  kubelet            Container image "darksharkash/user-webservice:v1" already present on machine
+  Normal  Created    5m28s  kubelet            Created container: crud-app-ext-pg
+  Normal  Started    5m28s  kubelet            Started container crud-app-ext-pg
+Ubuntu-VM% kubectl get hpa                                      
+NAME              REFERENCE                    TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+crud-app-ext-pg   Deployment/crud-app-ext-pg   cpu: 9%/20%, memory: 70%/30%   1         3         3          6m54s
+Ubuntu-VM% 
+
+
+
+
+
+
+
+
+
+Ubuntu-VM% curl --insecure  https://springboot.local/api/users
+
+[{"id":1,"name":"Ash","email":"ash@example.com"}]%                                                                                                                                                          Ubuntu-VM% curl --insecure -X POST https://springboot.local/api/users \
+-H "Content-Type: application/json" \
+-d '{"name": "John", "email": "john@example.com"}'
+
+{"id":2,"name":"John","email":"john@example.com"}%                                                                                                                                                          Ubuntu-VM% curl --insecure  https://springboot.local/api/users         
+
+[{"id":1,"name":"Ash","email":"ash@example.com"},{"id":2,"name":"John","email":"john@example.com"}]%                                                                                                        Ubuntu-VM% curl --insecure -X PUT https://springboot.local/api/users/1 \
+-H "Content-Type: application/json" \
+-d '{"name": "Ash Updated", "email": "ashupdated@example.com"}'
+
+{"id":1,"name":"Ash Updated","email":"ashupdated@example.com"}%                                                                                                                                             Ubuntu-VM% curl --insecure -X DELETE https://springboot.local/api/users/2
+
+Ubuntu-VM% curl --insecure  https://springboot.local/api/users          
+
+[{"id":1,"name":"Ash Updated","email":"ashupdated@example.com"}]%                                                                                                                                           Ubuntu-VM%  
+
+
+
+HPA FLOW 
+
+
+Ubuntu-VM% kubectl get hpa
+NAME              REFERENCE                    TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+crud-app-ext-pg   Deployment/crud-app-ext-pg   cpu: 5%/20%, memory: 73%/30%   1         3         3          30m
+Ubuntu-VM% 
+
+- Cleaning the resources
+
+
+Ubuntu-VM% helm uninstall crud-app-ext-pg                
+release "crud-app-ext-pg" uninstalled
+Ubuntu-VM% kubectl get all
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   38h
+Ubuntu-VM% 
+
+
+
+
+
+
+
+
