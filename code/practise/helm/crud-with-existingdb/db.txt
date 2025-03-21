@@ -286,3 +286,147 @@ Type "help" for help.
 imagedb=>                                                                                                                                                                                                                                  
 ┌──(ashfaq㉿kali-vm)-[~]
 └─$ 
+
+
+
+
+- db in ubuntu 
+
+Ubuntu-VM% docker run -d --name pg-db --network host -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=admin -e POSTGRES_DB=mainschema postgres:latest
+
+
+
+Ubuntu-VM% ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:f3:6d:e4 brd ff:ff:ff:ff:ff:ff
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+       valid_lft 80998sec preferred_lft 80998sec
+    inet6 fe80::a4ae:d32:76e6:dcda/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+3: br-8fad24bba368: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether aa:60:b5:29:cf:04 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.58.1/24 brd 192.168.58.255 scope global br-8fad24bba368
+       valid_lft forever preferred_lft forever
+    inet6 fe80::a860:b5ff:fe29:cf04/64 scope link 
+       valid_lft forever preferred_lft forever
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether d2:df:f8:dc:b6:46 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::d0df:f8ff:fedc:b646/64 scope link 
+       valid_lft forever preferred_lft forever
+9: vethe3b22ae@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-8fad24bba368 state UP group default 
+    link/ether 3e:07:15:22:0f:80 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::3c07:15ff:fe22:f80/64 scope link 
+       valid_lft forever preferred_lft forever
+Ubuntu-VM% 
+
+
+
+
+
+Ubuntu-VM% sudo apt update
+[sudo] password for ashu: 
+Hit:1 https://download.docker.com/linux/ubuntu jammy InRelease
+Hit:2 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Hit:3 http://us.archive.ubuntu.com/ubuntu jammy InRelease
+Hit:4 http://us.archive.ubuntu.com/ubuntu jammy-updates InRelease
+Hit:5 http://us.archive.ubuntu.com/ubuntu jammy-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+All packages are up to date
+
+
+
+Ubuntu-VM% sudo apt updatesudo apt update
+Ubuntu-VM% ls             
+minikube_latest_amd64.deb  Temp
+
+
+
+
+Ubuntu-VM% sudo apt install postgresql-client
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libpq5 postgresql-client-14 postgresql-client-common
+Suggested packages:
+  postgresql-14 postgresql-doc-14
+The following NEW packages will be installed:
+  libpq5 postgresql-client postgresql-client-14 postgresql-client-common
+0 upgraded, 4 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1,430 kB of archives.
+After this operation, 4,857 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://us.archive.ubuntu.com/ubuntu jammy-updates/main amd64 libpq5 amd64 14.17-0ubuntu0.22.04.1 [152 kB]
+Get:2 http://us.archive.ubuntu.com/ubuntu jammy/main amd64 postgresql-client-common all 238 [29.6 kB]
+Get:3 http://us.archive.ubuntu.com/ubuntu jammy-updates/main amd64 postgresql-client-14 amd64 14.17-0ubuntu0.22.04.1 [1,246 kB]
+Get:4 http://us.archive.ubuntu.com/ubuntu jammy/main amd64 postgresql-client all 14+238 [3,292 B]
+Fetched 1,430 kB in 4s (335 kB/s)               
+Selecting previously unselected package libpq5:amd64.
+(Reading database ... 202255 files and directories currently installed.)
+Preparing to unpack .../libpq5_14.17-0ubuntu0.22.04.1_amd64.deb ...
+Unpacking libpq5:amd64 (14.17-0ubuntu0.22.04.1) ...
+Selecting previously unselected package postgresql-client-common.
+Preparing to unpack .../postgresql-client-common_238_all.deb ...
+Unpacking postgresql-client-common (238) ...
+Selecting previously unselected package postgresql-client-14.
+Preparing to unpack .../postgresql-client-14_14.17-0ubuntu0.22.04.1_amd64.deb ...
+Unpacking postgresql-client-14 (14.17-0ubuntu0.22.04.1) ...
+Selecting previously unselected package postgresql-client.
+Preparing to unpack .../postgresql-client_14+238_all.deb ...
+Unpacking postgresql-client (14+238) ...
+Setting up postgresql-client-common (238) ...
+Setting up libpq5:amd64 (14.17-0ubuntu0.22.04.1) ...
+Setting up postgresql-client-14 (14.17-0ubuntu0.22.04.1) ...
+update-alternatives: using /usr/share/postgresql/14/man/man1/psql.1.gz to provide /usr/share/man/man1/psql.1.gz (psql.1.gz) in auto mode
+Setting up postgresql-client (14+238) ...
+Processing triggers for man-db (2.10.2-1) ...
+Processing triggers for libc-bin (2.35-0ubuntu3.9) ...
+
+
+
+
+
+Ubuntu-VM% psql -h 10.0.2.15  -p 5432 -U postgres -d mainschema
+Password for user postgres: 
+psql (14.17 (Ubuntu 14.17-0ubuntu0.22.04.1), server 17.4 (Debian 17.4-1.pgdg120+2))
+WARNING: psql major version 14, server major version 17.
+         Some psql features might not work.
+Type "help" for help.
+
+mainschema=# select * from users
+mainschema-# ;
+ERROR:  relation "users" does not exist
+LINE 1: select * from users
+                      ^
+mainschema=# select * from users;
+;
+ERROR:  relation "users" does not exist
+LINE 1: select * from users;
+                      ^
+mainschema=# CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255),
+  email VARCHAR(255)
+);
+CREATE TABLE
+mainschema=# INSERT INTO users (name, email) VALUES ('Ash', 'ash@example.com');
+INSERT 0 1
+mainschema=# GRANT ALL PRIVILEGES ON TABLE users TO postgres;
+GRANT
+mainschema=# select * from users;
+ id | name |      email      
+----+------+-----------------
+  1 | Ash  | ash@example.com
+(1 row)
+
+ IP we select host ip as docker ip connection failed .
