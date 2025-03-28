@@ -1,0 +1,9 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: default-runtime
+handler: docker  # Set to "docker" for Minikube with Docker runtime
+overhead:
+  podFixed:
+    memory: "100Mi"
+    cpu: "100m"
