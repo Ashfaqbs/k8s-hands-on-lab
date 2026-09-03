@@ -3,7 +3,7 @@
 #### **Introduction**  
 Kubernetes, also referred to as Chiba Noticeman here, is an open-source platform for automating the deployment, scaling, and management of containerized applications. It provides high availability, fault tolerance, and scalability through its distributed architecture.  
 
-![alt text](assets/getting-started/image-5.png)
+![alt text](../assets/getting-started/image-5.png)
 
 ---
 
@@ -16,7 +16,7 @@ Kubernetes, also referred to as Chiba Noticeman here, is an open-source platform
 
 #####  Master Node and its Components:  
 
-![alt text](assets/getting-started/image-6.png)
+![alt text](../assets/getting-started/image-6.png)
 
 
 ### **API Server**  
@@ -126,7 +126,7 @@ The **Scheduler** is a critical component in the master node that handles the pl
 - Handles resource contention and prevents overloading of any single node.  
 - Plays a vital role in **scaling**, **high availability**, and **fault tolerance**.
 
-![alt text](assets/getting-started/image-7.png)
+![alt text](../assets/getting-started/image-7.png)
 
 
 ### **Master Node Component: Controller Manager**  
@@ -264,7 +264,7 @@ A **Worker Node** is a physical or virtual machine in a Kubernetes cluster that 
   
 
 
-    ![alt text](assets/getting-started/image-8.png)
+    ![alt text](../assets/getting-started/image-8.png)
   
 ---
 

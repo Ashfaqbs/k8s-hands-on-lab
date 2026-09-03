@@ -1,7 +1,7 @@
 # **Lightweight Kubernetes Distributions: K3s & k0s**
 
 ### **Overview**
-Every other doc in this repo assumes "full" Kubernetes — the kind `kubeadm` builds, or what Minikube/Docker Desktop/Rancher Desktop run locally for you (see `../../Install-k8s.md`). That's a heavy stack: a multi-binary control plane, etcd, and historically a fair amount of legacy/cloud-provider code baked in. **K3s** and **k0s** are both real, CNCF-conformance-certified Kubernetes distributions — same API, same YAML, same `kubectl` — just repackaged to run in a fraction of the footprint. They exist for edge devices, IoT, Raspberry Pi clusters, CI runners, small VPS boxes, homelabs, and increasingly as a lighter alternative to Minikube for local dev too.
+Every other doc in this repo assumes "full" Kubernetes — the kind `kubeadm` builds, or what Minikube/Docker Desktop/Rancher Desktop run locally for you (see `../../getting-started/Install-k8s.md`). That's a heavy stack: a multi-binary control plane, etcd, and historically a fair amount of legacy/cloud-provider code baked in. **K3s** and **k0s** are both real, CNCF-conformance-certified Kubernetes distributions — same API, same YAML, same `kubectl` — just repackaged to run in a fraction of the footprint. They exist for edge devices, IoT, Raspberry Pi clusters, CI runners, small VPS boxes, homelabs, and increasingly as a lighter alternative to Minikube for local dev too.
 
 "Certified conformant" is the key phrase: neither is a fork with a different API. A Deployment, Service, Ingress, or any manifest from the rest of this repo applies identically once either is running.
 
@@ -94,7 +94,7 @@ k0sctl kubeconfig --config k0sctl.yaml > kubeconfig
 | **kubeadm** (vanilla K8s) | Heaviest | Bring-your-own everything | Real production, what managed services (EKS/AKS/GKE) build on conceptually |
 | **K3s** | Light (<100MB binary) | Batteries included (Traefik, ServiceLB, local-path) | Edge/IoT, ARM, small prod, "just works" |
 | **k0s** | Light (single static binary) | Minimal/unopinionated, pluggable | Same footprint goals as K3s, but you assemble the stack yourself |
-| **Minikube / Docker Desktop / Rancher Desktop** (see `../../Install-k8s.md`) | Local-machine only | Varies | Local dev/test loop, not meant to run real workloads or scale to multiple physical nodes |
+| **Minikube / Docker Desktop / Rancher Desktop** (see `../../getting-started/Install-k8s.md`) | Local-machine only | Varies | Local dev/test loop, not meant to run real workloads or scale to multiple physical nodes |
 
 Once any of these is up, every other doc in this repo — RBAC, NetworkPolicy, StatefulSets, Helm charts, HPA, Ingress — applies exactly the same way, since the API underneath is identical.
 

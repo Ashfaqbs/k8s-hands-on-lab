@@ -102,9 +102,9 @@ Also we have Marathon, Docker Compose ......
 ### **Repo Index**
 
 #### Getting Started
-- [Install-k8s.md](./Install-k8s.md)
-- [K8s-Architecture.md](./K8s-Architecture.md)
-- [Components.md](./Components.md)
+- [Install-k8s.md](./getting-started/Install-k8s.md)
+- [K8s-Architecture.md](./getting-started/K8s-Architecture.md)
+- [Components.md](./getting-started/Components.md)
 
 #### Core Concepts
 - [Namespaces](./concepts/namespace/Readme.md)

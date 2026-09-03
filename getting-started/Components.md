@@ -58,7 +58,7 @@
 - These plugins create a **virtual network** overlay, allowing each Pod to have a unique **virtual IP address** within the cluster.  
 - The node’s physical IP address remains unchanged, while the Pod IPs are dynamically assigned within the cluster’s **networking CIDR range**.  
 
-![alt text](assets/getting-started/image-4.png)
+![alt text](../assets/getting-started/image-4.png)
 
 
 
@@ -69,7 +69,7 @@
   - **Virtual Machines**: Examples include cloud-based instances like AWS EC2 or Azure VMs.  
   - **Physical Machines**: Bare-metal servers or on-premises machines.  
 
-![alt text](assets/getting-started/image-2.png)
+![alt text](../assets/getting-started/image-2.png)
 
 ### **Cluster**  
 
@@ -91,7 +91,7 @@
 - Think of it as the **command center**, where all the crucial decisions are made—deploying Pods, scaling workloads, maintaining the desired state, and healing the cluster when things go wrong.  
 - Without the Control Plane, the Kubernetes cluster is just a collection of machines with no intelligence or coordination.  
 
- ![alt text](assets/getting-started/image-3.png)
+ ![alt text](../assets/getting-started/image-3.png)
 
 
 ### **Replica Set / Replication Controller**  
@@ -180,7 +180,7 @@ Let me know the next component or if you want to add more details!
 | **LoadBalancer** | External with load balancing | Production-level, scalable applications exposed to the internet. |  
 
 
-![alt text](assets/getting-started/image-1.png)
+![alt text](../assets/getting-started/image-1.png)
 
 
 ### **Deployment in Kubernetes**  
@@ -326,7 +326,7 @@ Imagine a Spring Boot app:
 
 **Benefit**: Any updates to Secrets or ConfigMaps don’t require changes in the application code, Docker image, or redeployment.  
 
-![alt text](assets/getting-started/image.png)
+![alt text](../assets/getting-started/image.png)
 
 
 
