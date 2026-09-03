@@ -99,3 +99,39 @@ Also we have Marathon, Docker Compose ......
 
 ---
 
+### **Repo Index**
+
+#### Getting Started
+- [Install-k8s.md](./Install-k8s.md)
+- [K8s-Architecture.md](./K8s-Architecture.md)
+- [Components.md](./Components.md)
+
+#### Core Concepts
+- [Namespaces](./concepts/namespace/Readme.md)
+- [Kubeconfig](./concepts/kubeconfig/Readme.md)
+- [Volumes / PV & PVC](./concepts/PVC/K8s-Volumes-Documentation.md) ([management notes](./concepts/PVC/K8s-PVC&PV-Mgmt.md))
+- [Eventing](./concepts/k8s-eventing/Readme.md)
+- [Networking: TCP vs UDP](./concepts/networks/tcp-vs-udp.md)
+
+#### Concept Guides (newly added)
+- [RBAC (Role-Based Access Control)](./concepts/rbac/Readme.md) — Roles, ClusterRoles, ServiceAccounts, worked example + `kubectl auth can-i`
+- [NetworkPolicy](./concepts/network-policy/Readme.md) — default-deny and selective-allow pod-to-pod traffic rules
+- [StatefulSets](./concepts/statefulset/Readme.md) — stable identity/storage for stateful workloads, done right vs. a plain Deployment
+- [ResourceQuota & LimitRange](./concepts/resource-quota/Readme.md) — namespace-wide resource caps and defaults
+- [Observability (Prometheus & Grafana)](./concepts/observability/Readme.md) — metrics, dashboards, `ServiceMonitor`
+- [GitOps & CI/CD](./concepts/gitops-cicd/Readme.md) — push-based pipelines vs. pull-based GitOps (ArgoCD/Flux)
+- [CRDs & Operators](./concepts/crd-operators/Readme.md) — extending the K8s API, the watch/diff/act control loop
+
+#### Commands & Templates
+- [kubectl Cheatsheet](./commands/Cheatsheet.md) / [kubectl Reference](./commands/kubectl-reference.md)
+- [K8s YAML Templates](./k8s-yaml-templates/) — env vars, Deployment, Service, single vs. multi-container pod
+
+#### Helm
+- [Helm overview & installation](./helm/Readme.md)
+
+#### Hands-on Code Examples
+- [`code/`](./code/) — Java, Python, and JS apps deployed to K8s (CRUD, cron jobs, scaling, ingress, Helm)
+- [`Ingress/`](./Ingress/) — NGINX Ingress walkthrough with a multi-service demo project
+
+---
+
