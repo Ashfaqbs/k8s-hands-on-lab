@@ -1,1 +1,18 @@
 k8s-with-springboot/sb-cron-jobs/sb-cronjob-app/.classpath
+
+# Build/run artifacts
+*.log
+*.logs
+*.bak
+target/
+node_modules/
+build/
+dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
