@@ -112,6 +112,7 @@ Also we have Marathon, Docker Compose ......
 - [Volumes / PV & PVC](./concepts/PVC/K8s-Volumes-Documentation.md) ([management notes](./concepts/PVC/K8s-PVC&PV-Mgmt.md))
 - [Eventing](./concepts/k8s-eventing/Readme.md)
 - [Networking: TCP vs UDP](./concepts/networks/tcp-vs-udp.md)
+- [Lightweight K8s Distributions: K3s & k0s](./concepts/lightweight-k8s-distros/Readme.md) — what they are, why they exist, and how to get a cluster running
 
 #### Concept Guides (newly added)
 - [RBAC (Role-Based Access Control)](./concepts/rbac/Readme.md) — Roles, ClusterRoles, ServiceAccounts, worked example + `kubectl auth can-i`
