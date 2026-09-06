@@ -1,0 +1,24 @@
+# cloud.google.com/backend-config wires this Service's backing GCE backend service to
+# the BackendConfig CRD below -- that's how GKE Ingress picks up custom health-check
+# settings (and, if you enable them, Cloud CDN / Cloud Armor / IAP).
+#
+# cloud.google.com/neg enables container-native load balancing: the load balancer
+# targets pod IPs directly via a Network Endpoint Group instead of bouncing through
+# kube-proxy/iptables on a node. This is the GKE-recommended default for anything
+# sitting behind an Ingress.
+apiVersion: v1
+kind: Service
+metadata:
+  name: gke-backend-demo
+  namespace: gke-demo-ns
+  annotations:
+    cloud.google.com/backend-config: '{"default": "gke-backend-demo-backendconfig"}'
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: gke-backend-demo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080

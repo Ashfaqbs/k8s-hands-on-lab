@@ -1,0 +1,13 @@
+# Also GKE-only (networking.gke.io/v1beta1). Where BackendConfig tunes how the load
+# balancer talks to your pods, FrontendConfig tunes how it talks to clients -- here,
+# forcing HTTP requests on the LB's IP to 301-redirect to HTTPS instead of serving
+# plaintext. Attached to the Ingress via the annotation in 07-ingress.yaml.
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: gke-backend-demo-frontendconfig
+  namespace: gke-demo-ns
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT

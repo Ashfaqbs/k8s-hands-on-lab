@@ -1,0 +1,68 @@
+# Two containers per pod:
+#   app             - the Spring Boot backend, talking to Postgres on 127.0.0.1
+#   cloud-sql-proxy - Cloud SQL Auth Proxy sidecar. It authenticates to the Cloud SQL
+#                     Admin API using the pod's Workload Identity, opens an encrypted
+#                     tunnel to the instance, and exposes it on localhost:5432.
+#                     The app never sees a Cloud SQL IP, a CA cert, or (with
+#                     --auto-iam-authn) even a real DB password.
+#
+# resources.requests/limits are set on BOTH containers because GKE Autopilot rejects
+# any pod that doesn't declare them -- on GKE Standard they're "should", on Autopilot
+# they're "must".
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gke-backend-demo
+  namespace: gke-demo-ns
+  labels:
+    app.kubernetes.io/name: gke-backend-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gke-backend-demo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gke-backend-demo
+    spec:
+      serviceAccountName: gke-backend-demo
+      containers:
+        - name: app
+          image: REGION-docker.pkg.dev/PROJECT_ID/gke-backend-demo/gke-backend-demo:0.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: "127.0.0.1"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "gkedemo"
+            - name: DB_USERNAME
+              # IAM DB auth username: the GSA email with the .gserviceaccount.com suffix
+              # stripped off, per Cloud SQL's IAM auth username rules.
+              value: "gke-backend-demo@PROJECT_ID.iam"
+          resources:
+            requests: { cpu: 250m, memory: 384Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 20
+            periodSeconds: 15
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.0
+          args:
+            - "--structured-logs"
+            - "--auto-iam-authn"
+            - "PROJECT_ID:REGION:gke-backend-demo-db"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 200m, memory: 256Mi }

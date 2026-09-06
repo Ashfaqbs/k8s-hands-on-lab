@@ -1,0 +1,23 @@
+# Plain, portable HPA -- nothing GKE-specific here. On GKE Standard this is exactly
+# what you'd run. On GKE Autopilot, Autopilot's own node-level autoscaling handles
+# capacity, but this pod-level HPA is still what decides *replica count*, so you keep
+# it either way.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gke-backend-demo
+  namespace: gke-demo-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gke-backend-demo
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

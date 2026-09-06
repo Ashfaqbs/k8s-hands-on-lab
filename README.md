@@ -137,6 +137,7 @@ Also we have Marathon, Docker Compose ......
 #### Hands-on Code Examples
 - [`code/`](./code/) — Java, Python, and JS apps deployed to K8s (CRUD, cron jobs, scaling, ingress, Helm)
 - [`code/java/k8s-with-springboot/secrets-tls-demo-app`](./code/java/k8s-with-springboot/secrets-tls-demo-app) — Spring Boot + Postgres, secrets via Vault/External Secrets Operator, TLS via cert-manager, optional ArgoCD GitOps source; see its [production-hardening.md](./code/java/k8s-with-springboot/secrets-tls-demo-app/production-hardening.md) for the local-vs-real-prod diff
+- [`code/java/k8s-with-springboot/gke-backend-demo`](./code/java/k8s-with-springboot/gke-backend-demo) — Spring Boot + Cloud SQL, deployed to GKE with plain manifests (no Helm): Workload Identity, Cloud SQL Auth Proxy sidecar (no DB password), GKE Ingress with `BackendConfig`/`FrontendConfig`/`ManagedCertificate`; see its [gke-specific-features.md](./code/java/k8s-with-springboot/gke-backend-demo/gke-specific-features.md) for what's unique to GKE vs. portable Kubernetes
 - [`Ingress/`](./Ingress/) — NGINX Ingress walkthrough with a multi-service demo project
 
 ---

@@ -1,0 +1,27 @@
+# GKE-only CRD (cloud.google.com/v1). Has no equivalent on vanilla Kubernetes -- it
+# configures the actual GCE backend service the Ingress's load balancer creates:
+# health-check tuning, request timeout, connection draining on rollout, and (commented
+# out below) the load-balancer-level features you'd only reach for in production.
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: gke-backend-demo-backendconfig
+  namespace: gke-demo-ns
+spec:
+  healthCheck:
+    type: HTTP
+    requestPath: /actuator/health
+    port: 8080
+    checkIntervalSec: 15
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+  timeoutSec: 30
+  connectionDraining:
+    drainingTimeoutSec: 60
+  # cdn:
+  #   enabled: true
+  #   cachePolicy: { includeHost: true, includeQueryString: false }
+  # iap:
+  #   enabled: true
+  #   oauthclientCredentials: { secretName: gke-backend-demo-iap-oauth }

@@ -1,0 +1,16 @@
+# GKE-only CRD (networking.gke.io/v1). Google provisions and auto-renews a publicly
+# trusted TLS cert for each listed domain -- no cert-manager, no ACME solver, no
+# Secret holding a private key for you to manage. The tradeoff: it only activates
+# once the domain's DNS A record actually points at the Ingress's static IP, and that
+# first issuance can take up to ~60 minutes. Compare with cert-manager's ACME flow in
+# ../../secrets-tls-demo-app/production-hardening.md#1-real-certificates-instead-of-self-signed
+# -- same end result (a trusted cert), different mechanism, because this one is
+# GKE/GCLB-specific rather than a cluster-portable Kubernetes pattern.
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: gke-backend-demo-cert
+  namespace: gke-demo-ns
+spec:
+  domains:
+    - api.example.com
