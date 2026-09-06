@@ -125,10 +125,12 @@ Also we have Marathon, Docker Compose ......
 
 #### Commands & Templates
 - [kubectl Cheatsheet](./commands/Cheatsheet.md) / [kubectl Reference](./commands/kubectl-reference.md)
+- [Helm Commands Cheatsheet](./commands/helm-cheatsheet.md)
 - [K8s YAML Templates](./k8s-yaml-templates/) — env vars, Deployment, Service, single vs. multi-container pod
 
 #### Helm
 - [Helm overview & installation](./helm/Readme.md)
+- [`helm template` & multi-env `values` files](./helm/helm-template-and-multi-env-values.md) — local validation, `-f`/`--set` precedence, `lint` vs `template` vs `--dry-run`, diffing dev/stg/prd
 
 #### Hands-on Code Examples
 - [`code/`](./code/) — Java, Python, and JS apps deployed to K8s (CRUD, cron jobs, scaling, ingress, Helm)
