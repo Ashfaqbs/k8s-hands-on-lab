@@ -6,11 +6,10 @@ cluster (minikube, EKS, on-prem). See
 [gke-specific-features.md](./gke-specific-features.md) for what's unique to GKE and why
 each piece exists; this file is the run-order walkthrough.
 
-New to the Google Cloud Console specifically (not just new to this repo)? The
-click-by-click version of every step below — including where each button actually is,
-why each step exists, and what people commonly forget to clean up — is the companion
-interactive walkthrough: see the link the assistant gave you alongside this repo, or
-ask for it again if you've lost it. This file stays the terse command reference.
+New to the Google Cloud Console specifically (not just new to this repo)? See
+[console-walkthrough.md](./console-walkthrough.md) for the click-by-click version of
+every step below — where each button actually is, why each step exists, and what
+people commonly forget to clean up. This file stays the terse command reference.
 
 **This is documentation, not a script to run blind.** A real GKE cluster, Artifact
 Registry repo, and Cloud SQL instance all cost money and need a GCP project with
