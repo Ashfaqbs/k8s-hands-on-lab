@@ -1,0 +1,76 @@
+replicaCount: 1
+
+image:
+  repository: demo-app
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+# dbHost/dbName/dbUsername/dbPassword are derived from postgres.* below
+appSecret:
+  dbPort: "5432"
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  storage: 1Gi
+  database: demo
+  username: demo
+  password: demo
+
+# Vault / External Secrets Operator wiring. See README for local setup.
+vault:
+  enabled: true
+  # Set false once a platform-managed ClusterSecretStore already exists
+  # in the cluster -- then this chart only needs to reference it by name
+  # instead of creating its own (see vault-secretstore.yaml).
+  createSecretStore: true
+  secretStoreName: vault-backend
+  secretStoreKind: ClusterSecretStore
+  refreshInterval: "1h"
+  # KV path inside Vault holding DB_HOST/DB_PORT/DB_NAME/DB_USERNAME/DB_PASSWORD
+  secretPath: secret/demo/demo-app/creds
+  address: http://vault.vault-ns.svc.cluster.local:8200
+  kvPath: secret
+  kvVersion: v2
+  tokenSecretName: vault-eso-token
+  token: root
+
+ingress:
+  enabled: true
+  host: demo-app.local
+
+tls:
+  enabled: true
+  createIssuer: true
+  issuerName: selfsigned-cluster-issuer
+  issuerKind: ClusterIssuer
+  secretName: demo-app-tls-secret

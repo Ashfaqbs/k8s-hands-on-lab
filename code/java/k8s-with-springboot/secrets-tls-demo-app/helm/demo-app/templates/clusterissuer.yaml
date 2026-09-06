@@ -1,0 +1,14 @@
+{{- if and .Values.tls.enabled .Values.tls.createIssuer }}
+# Cluster-scoped, normally installed once by platform tooling — most real
+# clusters already have a shared ClusterIssuer (backed by a real CA or ACME
+# provider) that app charts just reference by name instead of creating.
+# Self-signed here since there's no real CA available locally --
+# browsers will flag it untrusted, but the cert-manager -> Certificate
+# -> Secret -> Ingress wiring behaves identically to a real CA.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.tls.issuerName }}
+spec:
+  selfSigned: {}
+{{- end }}

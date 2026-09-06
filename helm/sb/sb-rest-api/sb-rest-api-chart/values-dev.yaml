@@ -1,0 +1,10 @@
+# Dev overrides — only the keys that differ from values.yaml's defaults.
+replicaCount: 1
+
+image:
+  tag: "dev-latest"
+
+resources: {}
+
+ingress:
+  enabled: false

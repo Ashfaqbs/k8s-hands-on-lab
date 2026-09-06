@@ -1,0 +1,36 @@
+# Staging overrides — only the keys that differ from values.yaml's defaults.
+replicaCount: 2
+
+image:
+  tag: "stg"
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: http
+  initialDelaySeconds: 20
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: sb-rest-api-stg.internal
+      paths:
+        - path: /
+          pathType: ImplementationSpecific

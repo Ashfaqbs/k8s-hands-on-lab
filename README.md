@@ -122,6 +122,7 @@ Also we have Marathon, Docker Compose ......
 - [Observability (Prometheus & Grafana)](./concepts/observability/Readme.md) — metrics, dashboards, `ServiceMonitor`
 - [GitOps & CI/CD](./concepts/gitops-cicd/Readme.md) — push-based pipelines vs. pull-based GitOps (ArgoCD/Flux)
 - [CRDs & Operators](./concepts/crd-operators/Readme.md) — extending the K8s API, the watch/diff/act control loop
+- [Secrets Management Patterns](./concepts/secrets-management/Readme.md) — ConfigMap+Secret vs. External Secrets Operator vs. Vault Agent sidecar injection, compared
 
 #### Commands & Templates
 - [kubectl Cheatsheet](./commands/Cheatsheet.md) / [kubectl Reference](./commands/kubectl-reference.md)
@@ -131,9 +132,11 @@ Also we have Marathon, Docker Compose ......
 #### Helm
 - [Helm overview & installation](./helm/Readme.md)
 - [`helm template` & multi-env `values` files](./helm/helm-template-and-multi-env-values.md) — local validation, `-f`/`--set` precedence, `lint` vs `template` vs `--dry-run`, diffing dev/stg/prd
+- [`values.yaml` → rendered manifest walkthrough](./helm/values-to-templates-walkthrough.md) — Deployment/Service/Ingress/HPA field-by-field, plus a real dev/stg/prod render with two gotchas caught by actually reading the output
 
 #### Hands-on Code Examples
 - [`code/`](./code/) — Java, Python, and JS apps deployed to K8s (CRUD, cron jobs, scaling, ingress, Helm)
+- [`code/java/k8s-with-springboot/secrets-tls-demo-app`](./code/java/k8s-with-springboot/secrets-tls-demo-app) — Spring Boot + Postgres, secrets via Vault/External Secrets Operator, TLS via cert-manager, optional ArgoCD GitOps source; see its [production-hardening.md](./code/java/k8s-with-springboot/secrets-tls-demo-app/production-hardening.md) for the local-vs-real-prod diff
 - [`Ingress/`](./Ingress/) — NGINX Ingress walkthrough with a multi-service demo project
 
 ---
