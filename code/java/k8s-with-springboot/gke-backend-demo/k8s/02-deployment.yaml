@@ -6,7 +6,15 @@
 #                     The app never sees a Cloud SQL IP, a CA cert, or (with
 #                     --auto-iam-authn) even a real DB password.
 #
-# resources.requests/limits are set on BOTH containers because GKE Autopilot rejects
+# Three different ways an env var reaches this pod, side by side (see
+# ../gke-specific-features.md for the full comparison):
+#   DB_HOST / DB_PORT / DB_NAME  - plain, non-sensitive, written directly below
+#   DB_USERNAME + the proxy      - zero secret material at all (IAM DB auth)
+#   EXTERNAL_API_KEY             - a real secret that has no IAM-auth shortcut,
+#                                   synced from Secret Manager by the CSI volume
+#                                   below into a native Secret, then read via envFrom
+#
+# resources.requests/limits are set on every container because GKE Autopilot rejects
 # any pod that doesn't declare them -- on GKE Standard they're "should", on Autopilot
 # they're "must".
 apiVersion: apps/v1
@@ -44,6 +52,11 @@ spec:
               # IAM DB auth username: the GSA email with the .gserviceaccount.com suffix
               # stripped off, per Cloud SQL's IAM auth username rules.
               value: "gke-backend-demo@PROJECT_ID.iam"
+          envFrom:
+            # Populated by the Secret Manager CSI driver's secretObjects sync --
+            # see 09-secretproviderclass.yaml. The app just sees a normal env var.
+            - secretRef:
+                name: gke-backend-demo-api-key-secret
           resources:
             requests: { cpu: 250m, memory: 384Mi }
             limits: { cpu: 500m, memory: 512Mi }
@@ -55,6 +68,13 @@ spec:
             httpGet: { path: /actuator/health/liveness, port: 8080 }
             initialDelaySeconds: 20
             periodSeconds: 15
+          volumeMounts:
+            # Not strictly needed once secretObjects has synced the value into the
+            # env var above -- mounted here too so you can see the raw file the CSI
+            # driver actually writes (kubectl exec in and `cat` it).
+            - name: secrets-store
+              mountPath: /mnt/secrets
+              readOnly: true
         - name: cloud-sql-proxy
           image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.0
           args:
@@ -66,3 +86,10 @@ spec:
           resources:
             requests: { cpu: 100m, memory: 128Mi }
             limits: { cpu: 200m, memory: 256Mi }
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.gke.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: gke-backend-demo-secrets

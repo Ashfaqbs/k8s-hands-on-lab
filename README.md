@@ -122,7 +122,7 @@ Also we have Marathon, Docker Compose ......
 - [Observability (Prometheus & Grafana)](./concepts/observability/Readme.md) — metrics, dashboards, `ServiceMonitor`
 - [GitOps & CI/CD](./concepts/gitops-cicd/Readme.md) — push-based pipelines vs. pull-based GitOps (ArgoCD/Flux)
 - [CRDs & Operators](./concepts/crd-operators/Readme.md) — extending the K8s API, the watch/diff/act control loop
-- [Secrets Management Patterns](./concepts/secrets-management/Readme.md) — ConfigMap+Secret vs. External Secrets Operator vs. Vault Agent sidecar injection, compared
+- [Secrets Management Patterns](./concepts/secrets-management/Readme.md) — ConfigMap+Secret vs. External Secrets Operator vs. Vault Agent sidecar injection vs. GKE Secret Manager CSI, compared
 
 #### Commands & Templates
 - [kubectl Cheatsheet](./commands/Cheatsheet.md) / [kubectl Reference](./commands/kubectl-reference.md)

@@ -132,7 +132,59 @@ platforms pick cert-manager when they need wildcard certs, DNS-01, or a non-GKE
 ingress controller; they pick `ManagedCertificate` when "just works, zero moving
 parts" outweighs that flexibility.
 
-## 6. GKE Autopilot vs. Standard — what actually changes in these manifests
+## 6. Secret Manager CSI driver — GKE's own way to get a secret into an env var
+
+**The problem it solves:** IAM DB auth (section 2) eliminates the DB password
+entirely, but that trick only works because Cloud SQL itself understands IAM
+identities. A third-party API key, a webhook signing secret, anything the app needs
+that isn't a GCP-native resource — none of that has an IAM-auth shortcut. Something
+still has to get a real secret value into the pod.
+
+**How GKE solves it:** the **GKE Secret Manager add-on** — enabled once per cluster
+with `gcloud container clusters update CLUSTER --enable-secret-manager` — lets any pod
+mount a Google Secret Manager secret via a CSI volume, authenticated with the pod's
+own Workload Identity. No separate CSI driver to install or upgrade, no provider
+plugin to manage — it's a managed cluster feature, the same way Workload Identity
+itself is.
+
+```yaml
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: gke-backend-demo-secrets
+spec:
+  provider: gke
+  parameters:
+    secrets: |
+      - resourceName: "projects/PROJECT_ID/secrets/gke-backend-demo-external-api-key/versions/latest"
+        path: "api-key"
+  secretObjects:
+    - secretName: gke-backend-demo-api-key-secret
+      data:
+        - objectName: api-key
+          key: EXTERNAL_API_KEY
+```
+
+`secretObjects` is the part worth noticing: the same CSI volume that mounts the value
+as a *file* (`/mnt/secrets/api-key`, wired up in `02-deployment.yaml`) also
+materializes it as a real Kubernetes `Secret` object, so the app can keep consuming it
+the ordinary way — `envFrom: secretRef` — with zero code changes. This is what makes
+it directly comparable to the other three approaches in
+[the secrets-management doc](../../../../concepts/secrets-management/Readme.md): same end
+state (an env var in the pod), different place the value is authored and different
+blast radius if that place is compromised.
+
+|  | Plain Secret | ESO + Vault | Vault Agent Injector | **Secret Manager CSI (GKE)** |
+|---|---|---|---|---|
+| Extra infra required | None | ESO + Vault | Vault + injector webhook | **None — managed cluster add-on** |
+| Where the value is authored | Wherever someone applies the Secret | Vault | Vault | **Secret Manager** |
+| Needs Workload Identity | No | No (uses a Vault token/K8s-auth role) | No (uses K8s auth role) | **Yes** |
+| Portable to non-GKE clusters | Yes | Yes | Yes | **No — GKE only** |
+
+Pick this one specifically when the cluster is GKE, the value already lives (or should
+live) in Secret Manager, and there's no reason to run Vault just for this.
+
+## 7. GKE Autopilot vs. Standard — what actually changes in these manifests
 
 Everything above works identically on both modes. What's mode-specific:
 
@@ -148,7 +200,7 @@ Everything above works identically on both modes. What's mode-specific:
 chart runs unmodified on Autopilot — on Standard those same values just mean sane
 bin-packing.
 
-## 7. What's deliberately *not* GKE-specific here
+## 8. What's deliberately *not* GKE-specific here
 
 The `Deployment`'s liveness/readiness probes, the `HPA`, and the app's Spring Boot
 config are plain portable Kubernetes — no reason to make them GKE-only. The

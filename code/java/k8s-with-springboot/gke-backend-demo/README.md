@@ -6,6 +6,12 @@ cluster (minikube, EKS, on-prem). See
 [gke-specific-features.md](./gke-specific-features.md) for what's unique to GKE and why
 each piece exists; this file is the run-order walkthrough.
 
+New to the Google Cloud Console specifically (not just new to this repo)? The
+click-by-click version of every step below — including where each button actually is,
+why each step exists, and what people commonly forget to clean up — is the companion
+interactive walkthrough: see the link the assistant gave you alongside this repo, or
+ask for it again if you've lost it. This file stays the terse command reference.
+
 **This is documentation, not a script to run blind.** A real GKE cluster, Artifact
 Registry repo, and Cloud SQL instance all cost money and need a GCP project with
 billing enabled. Every command below is real and correct — read it, understand it,
@@ -101,7 +107,25 @@ This last binding is the actual Workload Identity link: it says "pods running as
 `gke-backend-demo` KSA in the `gke-demo-ns` namespace of this specific GKE cluster may
 act as this GSA." Nothing else in the cluster can impersonate it.
 
-## 6. Reserve a static IP for the load balancer (needed by the ManagedCertificate)
+## 6. Enable the Secret Manager add-on and create the app's secret
+
+This is the piece that has no IAM-auth shortcut (see
+[gke-specific-features.md #6](./gke-specific-features.md#6-secret-manager-csi-driver--gkes-own-way-to-get-a-secret-into-an-env-var)) —
+a stand-in for any real third-party API key or webhook secret the app would need:
+
+```bash
+gcloud container clusters update gke-backend-demo --region REGION \
+  --enable-secret-manager
+
+printf 'replace-with-a-real-value' | gcloud secrets create gke-backend-demo-external-api-key \
+  --data-file=-
+
+gcloud secrets add-iam-policy-binding gke-backend-demo-external-api-key \
+  --member "serviceAccount:gke-backend-demo@PROJECT_ID.iam.gserviceaccount.com" \
+  --role roles/secretmanager.secretAccessor
+```
+
+## 7. Reserve a static IP for the load balancer (needed by the ManagedCertificate)
 
 ```bash
 gcloud compute addresses create gke-backend-demo-ip --global
@@ -111,27 +135,29 @@ gcloud compute addresses describe gke-backend-demo-ip --global --format="value(a
 Point `api.example.com`'s DNS A record at that IP before moving on — `ManagedCertificate`
 won't issue until the domain actually resolves to the load balancer.
 
-## 7. Edit the placeholders, then apply everything else
+## 8. Edit the placeholders, then apply everything else
 
 Replace `PROJECT_ID`, `REGION`, and `api.example.com` in `k8s/01-serviceaccount.yaml`,
-`k8s/02-deployment.yaml`, and `k8s/06-managedcertificate.yaml` with real values, then:
+`k8s/02-deployment.yaml`, `k8s/06-managedcertificate.yaml`, and
+`k8s/09-secretproviderclass.yaml` with real values, then:
 
 ```bash
 kubectl apply -f k8s/04-backendconfig.yaml
 kubectl apply -f k8s/05-frontendconfig.yaml
 kubectl apply -f k8s/06-managedcertificate.yaml
+kubectl apply -f k8s/09-secretproviderclass.yaml
 kubectl apply -f k8s/03-service.yaml
 kubectl apply -f k8s/02-deployment.yaml
 kubectl apply -f k8s/08-hpa.yaml
 kubectl apply -f k8s/07-ingress.yaml
 ```
 
-Order matters loosely here: `BackendConfig`/`FrontendConfig`/`ManagedCertificate` exist
-before the `Service`/`Ingress` that reference them by name, so GKE doesn't have to
-retry-and-reconcile a dangling reference (it would eventually anyway, but this avoids
-the noise).
+Order matters loosely here: `BackendConfig`/`FrontendConfig`/`ManagedCertificate`/
+`SecretProviderClass` exist before the `Service`/`Deployment`/`Ingress` that reference
+them by name, so GKE doesn't have to retry-and-reconcile a dangling reference (it would
+eventually anyway, but this avoids the noise).
 
-## 8. Verify each piece
+## 9. Verify each piece
 
 ```bash
 kubectl get pods -n gke-demo-ns -w
@@ -141,15 +167,19 @@ kubectl logs -n gke-demo-ns deploy/gke-backend-demo -c cloud-sql-proxy
 # look for "Ready for new connections" -- confirms the proxy authenticated via
 # Workload Identity and opened the tunnel to Cloud SQL
 
+kubectl get secret gke-backend-demo-api-key-secret -n gke-demo-ns
+# should exist once the Secret Manager CSI driver has synced it -- created by
+# secretObjects in 09-secretproviderclass.yaml, not by anything you applied directly
+
 kubectl get managedcertificate -n gke-demo-ns -w
 # Status.CertificateStatus moves Provisioning -> Active once DNS resolves and Google
 # finishes issuance (can take up to ~60 minutes)
 
 kubectl get ingress -n gke-demo-ns
-# ADDRESS column should match the static IP reserved in step 6
+# ADDRESS column should match the static IP reserved in step 7
 ```
 
-## 9. Hit the API
+## 10. Hit the API
 
 ```bash
 curl https://api.example.com/actuator/health
@@ -158,13 +188,14 @@ curl -X POST https://api.example.com/api/v1/items \
 curl https://api.example.com/api/v1/items
 ```
 
-## 10. Tear down (to stop being billed)
+## 11. Tear down (to stop being billed)
 
 ```bash
 kubectl delete -f k8s/07-ingress.yaml -f k8s/08-hpa.yaml -f k8s/02-deployment.yaml \
-  -f k8s/03-service.yaml -f k8s/06-managedcertificate.yaml \
-  -f k8s/05-frontendconfig.yaml -f k8s/04-backendconfig.yaml
+  -f k8s/03-service.yaml -f k8s/09-secretproviderclass.yaml \
+  -f k8s/06-managedcertificate.yaml -f k8s/05-frontendconfig.yaml -f k8s/04-backendconfig.yaml
 kubectl delete namespace gke-demo-ns
+gcloud secrets delete gke-backend-demo-external-api-key
 gcloud compute addresses delete gke-backend-demo-ip --global
 gcloud sql instances delete gke-backend-demo-db
 gcloud container clusters delete gke-backend-demo --region REGION

@@ -1,7 +1,7 @@
 # Secrets Management Patterns in Kubernetes
 
-Three approaches you'll actually run into in real environments, from simplest to most
-involved. All three ultimately answer the same question — "how does a pod get its DB
+Four approaches you'll actually run into in real environments, from simplest to most
+involved. All four ultimately answer the same question — "how does a pod get its DB
 password without it being hardcoded in a YAML file committed to git" — but they trade off
 differently on visibility, coupling, and blast radius.
 
@@ -145,16 +145,60 @@ as a K8s API object — regulated workloads, or teams that already run Vault eve
 want the tightest coupling between "who's asking" (the pod's ServiceAccount) and "what they
 get."
 
+## 4. GKE Secret Manager CSI — the cloud-native version of pattern 2, with no Vault
+
+If you're specifically on GKE, there's a fourth option that gets most of ESO's benefit
+(source of truth lives outside the cluster, app code unchanged) without running Vault or
+any extra controller at all: the **GKE Secret Manager add-on**. Enabled once per cluster
+(`gcloud container clusters update CLUSTER --enable-secret-manager`), it lets a
+`SecretProviderClass` mount a Google Secret Manager secret via a CSI volume — authenticated
+with the pod's own Workload Identity — and optionally sync it straight into a native `Secret`
+object via `secretObjects`, so the app keeps reading a normal env var.
+
+```yaml
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: my-app-secrets
+spec:
+  provider: gke
+  parameters:
+    secrets: |
+      - resourceName: "projects/PROJECT_ID/secrets/my-app-api-key/versions/latest"
+        path: "api-key"
+  secretObjects:
+    - secretName: my-app-api-key-secret
+      data:
+        - objectName: api-key
+          key: EXTERNAL_API_KEY
+```
+
+A full worked example — including the Deployment's volume/`envFrom` wiring — is in
+[gke-backend-demo](../../code/java/k8s-with-springboot/gke-backend-demo) (see its
+`k8s/09-secretproviderclass.yaml` and
+[gke-specific-features.md](../../code/java/k8s-with-springboot/gke-backend-demo/gke-specific-features.md#6-secret-manager-csi-driver--gkes-own-way-to-get-a-secret-into-an-env-var)).
+
+- ✅ No extra infrastructure to run — it's a managed cluster feature, same tier as
+  Workload Identity itself.
+- ✅ Source of truth lives in Secret Manager: its own IAM, audit logging, versioning.
+- ❌ **Not portable** — this is GKE-only. Moving the same app to EKS or a self-managed
+  cluster means switching to ESO or the generic Secrets Store CSI Driver + GCP provider.
+- ❌ Still ends up as a real `kubectl get secret`-visible object once `secretObjects`
+  syncs it, same visibility tradeoff as ESO.
+
 ## Choosing between them
 
-| | Plain Secret | ESO | Vault Agent Injector |
-|---|---|---|---|
-| Extra infra required | None | ESO controller + Vault | Vault + injector webhook |
-| Secret visible via `kubectl get secret`? | Yes | Yes (the synced copy) | **No** |
-| App code changes needed | None | None | Read from a file instead of env vars |
-| Behavior if secret backend is down | N/A (no backend) | Serves last-synced value | New pods fail to start |
-| Rotation | Manual | Automatic (on `refreshInterval`) | Automatic (Vault lease renewal) |
+| | Plain Secret | ESO + Vault | Vault Agent Injector | GKE Secret Manager CSI |
+|---|---|---|---|---|
+| Extra infra required | None | ESO controller + Vault | Vault + injector webhook | None (managed add-on) |
+| Secret visible via `kubectl get secret`? | Yes | Yes (the synced copy) | **No** | Yes (the synced copy) |
+| App code changes needed | None | None | Read from a file instead of env vars | None |
+| Behavior if secret backend is down | N/A (no backend) | Serves last-synced value | New pods fail to start | Serves last-synced value |
+| Rotation | Manual | Automatic (on `refreshInterval`) | Automatic (Vault lease renewal) | Automatic (on pod restart / periodic re-sync) |
+| Portable off GKE | Yes | Yes | Yes | **No** |
 
 In practice, plenty of real platforms run **1 and 2 side by side** — ESO for most services,
 plain Secrets for things that don't warrant a Vault entry — and reach for **3** only when a
 specific compliance or security requirement says a value must never exist as a K8s object.
+Shops that are GKE-only and don't already run Vault often reach for **4** instead of standing
+up ESO at all.
